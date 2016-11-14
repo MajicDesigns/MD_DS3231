@@ -1,4 +1,4 @@
-// Example code for the MD_DS3231library
+// Example code for the MD_DS3231 library
 //
 // Implements a clock display on a 16x2 LCD shield.
 // Display updates are triggered by a 1 second alarm from the RTC alarm 1.
