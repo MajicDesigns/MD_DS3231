@@ -9,7 +9,7 @@
 // Alarm is toggled on/off using the UP key
 // Alarm triggered will play a tone on a piezo speaker on BUZZER_PIN.
 //
-// MD_AButton library located at https://github.com/MajicDesigns/AButton
+// MD_AButton library located at https://github.com/MajicDesigns/MD_AButton
 //
 #include <LiquidCrystal.h>
 #include <MD_DS3231.h>

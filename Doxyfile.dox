@@ -51,7 +51,7 @@ PROJECT_BRIEF          = "Library to control DS3231 high precision clock with al
 # pixels and the maximum width should not exceed 200 pixels. Doxygen will copy
 # the logo to the output directory.
 
-PROJECT_LOGO           = "media/photo/DS3231 Icon.png"
+PROJECT_LOGO           = C:/Users/Marco/Documents/Programming/Arduino/Sketchbook/libraries/MD_DS3231/media/photo/MajicDesigns_Logo.png
 
 # The OUTPUT_DIRECTORY tag is used to specify the (relative or absolute) path
 # into which the generated documentation will be written. If a relative path is
