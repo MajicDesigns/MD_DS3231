@@ -16,4 +16,4 @@ This library features access to all on-chip features
 * Control of square wave generator (on/off & frequency)
 * Control of clock features (Square Wave type and on/off, 12/24H, day of week, etc)
 
-[Library Documentation](https://majicdesigns.github.io/DS3231/)
+[Library Documentation](https://majicdesigns.github.io/MD_DS3231/)
