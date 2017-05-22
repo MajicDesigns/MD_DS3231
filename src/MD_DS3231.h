@@ -36,6 +36,10 @@ ___
 
 Revision History 
 ----------------
+May 2017
+- Removed deprecated language features warnings for examples
+- Additional comments for examples
+
 Apr 2016 version 1.1
 - Fixed bug when setting time in 12 hour mode
 - Added now() and isrunning() methods for compatibility with MD_DS1307 library

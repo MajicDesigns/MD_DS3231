@@ -1,4 +1,4 @@
-// Example code for the MD_DS3231library
+// Example code for the MD_DS3231 library
 //
 // Implements an alarm clock on a 16x2 LCD shield with analog tact switches.
 //
@@ -64,10 +64,10 @@ void p2dig(uint8_t v)
   lcd.print(v);
 }
 
-char *dow2String(uint8_t code)
+const char *dow2String(uint8_t code)
 // Day of week to string. DOW 1=Sunday, 0 is undefined
 {
-  static char *str[] = {"---", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+  static const char *str[] = {"---", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
   return(str[code]);
 }
 

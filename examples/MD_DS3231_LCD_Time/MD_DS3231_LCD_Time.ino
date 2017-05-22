@@ -29,10 +29,10 @@ void p2dig(uint8_t v)
   lcd.print(v);
 }
 
-char *dow2String(uint8_t code)
+const char *dow2String(uint8_t code)
 // Day of week to string. DOW 1=Sunday, 0 is undefined
 {
-  static char *str[] = {"---", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+  static const char *str[] = {"---", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
   return(str[code]);
 }
 

@@ -1,3 +1,8 @@
+// Example program for the MD_DS3231 library
+//
+// Test the library and control all aspects of the RTC chip functions
+// using from the serial monitor.
+
 #include <MD_DS3231.h>
 #include <Wire.h>
 
@@ -43,14 +48,14 @@ void usage(void)
   PRINTS("\n\t8 - Set aging register (v hex value)");
 }
 
-char *dow2String(uint8_t code)
+const char *dow2String(uint8_t code)
 {
-  static char *str[] = {" ---", " Sun", " Mon", " Tue", " Wed", " Thu", " Fri", " Sat"};
+  static const char *str[] = {" ---", " Sun", " Mon", " Tue", " Wed", " Thu", " Fri", " Sat"};
 
   return(str[code]);
 }
 
-char *ctl2String(codeRequest_t code)
+const char *ctl2String(codeRequest_t code)
 {
  switch (code)
  {
@@ -72,7 +77,7 @@ char *ctl2String(codeRequest_t code)
  };
 }
 
-char *sts2String(codeStatus_t code, boolean bHexValue = false)
+const char *sts2String(codeStatus_t code, boolean bHexValue = false)
 {
   if (!bHexValue)
   {
@@ -97,7 +102,7 @@ char *sts2String(codeStatus_t code, boolean bHexValue = false)
   }
 }
 
-char *alm2String(almType_t alm)
+const char *alm2String(almType_t alm)
 {
   switch (alm)
   {
