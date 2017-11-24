@@ -36,7 +36,10 @@ ___
 
 Revision History 
 ----------------
-May 2017
+Nov 2018 version 1.2.1
+- Fixed text in header file
+
+May 2017 version 1.2
 - Removed deprecated language features warnings for examples
 - Additional comments for examples
 
@@ -159,7 +162,7 @@ The DS3231_LCD_Time example has examples of the different ways of interacting wi
 #include <Arduino.h>
 /**
  * \file
- * \brief Main header file for the MD_MAX72xx library
+ * \brief Main header file for the MD_DS3231 library
  */
 
 /**
