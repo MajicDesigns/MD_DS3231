@@ -14,7 +14,7 @@
 // Select the mode of operation for the library
 #define USE_POLLED      0 // polled only mode - use the return status from checkAlarm()
 #define USE_POLLED_CB   1 // polled mode with callback - checkAlarm() will invoke the callback
-#define USE_INTERRUPT   0 // exernal interrupt operation, set up for Arduino Uno pin PIN_INTERRUPT
+#define USE_INTERRUPT   0 // external interrupt operation, set up for Arduino Uno pin PIN_INTERRUPT
 
 #define PIN_INTERRUPT   2 // interrupt pin
 

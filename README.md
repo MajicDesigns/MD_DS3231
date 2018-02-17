@@ -1,3 +1,4 @@
+## MD_DS3231
 The DS3231 is a low-cost, extremely accurate I2C real time clock (RTC) with an 
 integrated temperature compensated crystal oscillator (TCXO) and crystal. Microprocessor interface is exclusively through an I2C bidirectional bus.
 

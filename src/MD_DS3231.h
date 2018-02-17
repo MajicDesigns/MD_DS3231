@@ -224,8 +224,8 @@ enum codeRequest_t
 /**
 	* Control and Status Request return values enumerated type.
 	*
-	* This enumerated type is used as the return status from the with the 
-   * control() and status() methods
+	* This enumerated type is used as the return status from the
+   * control() and status() methods.
 	*/
 enum codeStatus_t  
 {
@@ -374,7 +374,7 @@ class MD_DS3231
   inline uint8_t getCentury(void) { return(_century); };
 
   /**
-  * Compatinility function - Read the current time
+  * Compatibility function - Read the current time
   *
   * Wrapper to read the current time.
   *

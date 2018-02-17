@@ -291,7 +291,8 @@ void inputTime(void)
 void showDoW(void)
 {
   RTC.readTime();
-  PRINT("\nCalculated DoW is", dow2String(RTC.calcDoW(RTC.yyyy, RTC.mm, RTC.dd)));
+  PRINT("\nCalculated DoW (", RTC.calcDoW(RTC.yyyy, RTC.mm, RTC.dd));
+  PRINT(") is ", dow2String(RTC.calcDoW(RTC.yyyy, RTC.mm, RTC.dd)));
 }
 
 void cbAlarm1()
