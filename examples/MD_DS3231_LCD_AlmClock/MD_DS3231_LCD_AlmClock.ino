@@ -53,7 +53,7 @@ void displayUpdate(void)
     RTC.readAlarm2();
     almH = RTC.h;
     almM = RTC.m;
-    printAlarm();   
+    printAlarm();
   }
 }
 
@@ -68,6 +68,8 @@ const char *dow2String(uint8_t code)
 // Day of week to string. DOW 1=Sunday, 0 is undefined
 {
   static const char *str[] = {"---", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+  
+  if (code > 7) code = 0;
   return(str[code]);
 }
 
