@@ -1,6 +1,7 @@
 var class_m_d___d_s3231 =
 [
     [ "MD_DS3231", "class_m_d___d_s3231.html#a431cad851e180f1130f007d8fbc8577f", null ],
+    [ "MD_DS3231", "class_m_d___d_s3231.html#a8a2a01efc3de2f7b33f4518fb8dcd54d", null ],
     [ "calcDoW", "class_m_d___d_s3231.html#aabf5da893d2cd4d949b981eca544101c", null ],
     [ "checkAlarm1", "class_m_d___d_s3231.html#adc50b9cb40bb9b99b0cfb22707dad27f", null ],
     [ "checkAlarm2", "class_m_d___d_s3231.html#abacf87c9818cb127be8c25d6a1943fa5", null ],

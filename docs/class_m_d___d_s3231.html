@@ -102,6 +102,8 @@ $(document).ready(function(){initNavTree('class_m_d___d_s3231.html','');});
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a431cad851e180f1130f007d8fbc8577f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_m_d___d_s3231.html#a431cad851e180f1130f007d8fbc8577f">MD_DS3231</a> ()</td></tr>
 <tr class="separator:a431cad851e180f1130f007d8fbc8577f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8a2a01efc3de2f7b33f4518fb8dcd54d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_m_d___d_s3231.html#a8a2a01efc3de2f7b33f4518fb8dcd54d">MD_DS3231</a> (int sda, int scl)</td></tr>
+<tr class="separator:a8a2a01efc3de2f7b33f4518fb8dcd54d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Methods for object and hardware control.</div></td></tr>
 <tr class="memitem:a2f56700aed513db59f6ad3fcaed10dab"><td class="memItemLeft" align="right" valign="top">boolean&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_m_d___d_s3231.html#a2f56700aed513db59f6ad3fcaed10dab">control</a> (<a class="el" href="_m_d___d_s3231_8h.html#a581c30a62d450530fc2f28c96762b1f1">codeRequest_t</a> item, uint8_t value)</td></tr>
 <tr class="separator:a2f56700aed513db59f6ad3fcaed10dab"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -196,7 +198,7 @@ uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 <div class="textblock"><p>Core object for the <a class="el" href="class_m_d___d_s3231.html">MD_DS3231</a> library </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a431cad851e180f1130f007d8fbc8577f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a431cad851e180f1130f007d8fbc8577f">&#9670;&nbsp;</a></span>MD_DS3231()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a431cad851e180f1130f007d8fbc8577f">&#9670;&nbsp;</a></span>MD_DS3231() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -211,6 +213,43 @@ uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 </div><div class="memdoc">
 <p>Class Constructor</p>
 <p>Instantiate a new instance of the class. One instance of the class is created in the libraries as the RTC object. </p>
+
+</div>
+</div>
+<a id="a8a2a01efc3de2f7b33f4518fb8dcd54d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8a2a01efc3de2f7b33f4518fb8dcd54d">&#9670;&nbsp;</a></span>MD_DS3231() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">MD_DS3231::MD_DS3231 </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>sda</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>scl</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Overloaded Class Constructor (ESP8266 only)</p>
+<p>Provides a way to assign custom SCL and SDA pins if the architecture supports them.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sda</td><td>Pin number for the SDA signal </td></tr>
+    <tr><td class="paramname">scl</td><td>Pin number for the SCL signal </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -893,7 +932,7 @@ uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="class_m_d___d_s3231.html">MD_DS3231</a></li>
-    <li class="footer">Generated on Mon Apr 23 2018 15:18:26 for MD_DS3231 Real Time Clock Library by
+    <li class="footer">Generated on Tue Jun 26 2018 08:18:43 for MD_DS3231 Real Time Clock Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.14 </li>
   </ul>

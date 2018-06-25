@@ -36,6 +36,10 @@ ___
 
 Revision History 
 ----------------
+Jun 2018 version 1.2.4
+- Fixed compiler warnings
+- Added overloaded constructor for ESP8266
+
 Apr 2018 version 1.2.3
 - Small fixes to code
 
@@ -280,6 +284,17 @@ class MD_DS3231
   * 
   */
   MD_DS3231();
+
+  /**
+  * Overloaded Class Constructor (ESP8266 only)
+  *
+  * Provides a way to assign custom SCL and SDA pins if the architecture
+  * supports them.
+  *
+  * \param sda  Pin number for the SDA signal
+  * \param scl  Pin number for the SCL signal
+  */
+  MD_DS3231(int sda, int scl);
   
  //--------------------------------------------------------------
  /** \name Methods for object and hardware control.
@@ -362,7 +377,7 @@ class MD_DS3231
   * \param   c the year base century. Dates will start from (c*100).
   * \return false if errors, true otherwise.
   */
-  inline boolean setCentury(uint8_t c) { _century = c; };
+  inline boolean setCentury(uint8_t c) { _century = c; return(true); };
 
  /**
   * Get the current century for year handling in the library
@@ -483,7 +498,7 @@ class MD_DS3231
   * \param cb  the address of the callback function.
   * \return false if errors, true otherwise.
   */
-  inline boolean setAlarm1Callback(void (*cb)(void)) { _cbAlarm1 = cb; };
+  inline boolean setAlarm1Callback(void (*cb)(void)) { _cbAlarm1 = cb; return(true); };
 
  /** @} */
 
@@ -571,7 +586,7 @@ class MD_DS3231
   * \param cb  the address of the callback function.
   * \return false if errors, true otherwise.
   */
-  inline boolean setAlarm2Callback(void (*cb)(void)) { _cbAlarm2 = cb; };
+  inline boolean setAlarm2Callback(void (*cb)(void)) { _cbAlarm2 = cb; return(true); };
 
  /** @} */
 

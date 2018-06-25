@@ -19,19 +19,19 @@ class MD_DS3231 RTC;  // one instance created when library is included
 #define RAM_BASE_READ 0 // smallest read address
 
 // Addresses for the parts of the date/time in RAM
-#define ADDR_SEC  0x0
-#define ADDR_MIN  0x1
-#define ADDR_HR   0x2
-#define ADDR_DAY  0x3
-#define ADDR_TDATE 0x4
-#define ADDR_ADATE 0x3
-#define ADDR_MON  0x5
-#define ADDR_YR   0x6
+#define ADDR_SEC    ((uint8_t)0x0)
+#define ADDR_MIN    ((uint8_t)0x1)
+#define ADDR_HR     ((uint8_t)0x2)
+#define ADDR_DAY    ((uint8_t)0x3)
+#define ADDR_TDATE  ((uint8_t)0x4)
+#define ADDR_ADATE  ((uint8_t)0x3)
+#define ADDR_MON    ((uint8_t)0x5)
+#define ADDR_YR     ((uint8_t)0x6)
 
-#define ADDR_CTL_12H  0x2
-#define ADDR_CTL_PM   0x2
-#define ADDR_CTL_DYDT 0x3
-#define ADDR_CTL_100  0x5
+#define ADDR_CTL_12H  ((uint8_t)0x2)
+#define ADDR_CTL_PM   ((uint8_t)0x2)
+#define ADDR_CTL_DYDT ((uint8_t)0x3)
+#define ADDR_CTL_100  ((uint8_t)0x5)
 
 #define CTL_12H   0x40
 #define CTL_PM    0x20
@@ -106,7 +106,15 @@ _cbAlarm1(nullptr), _cbAlarm2(nullptr), _century(20)
 {
   Wire.begin();
 }
- 
+
+#ifdef ESP8266
+MD_DS3231::MD_DS3231(int sda, int scl) : yyyy(0), mm(0), dd(0), h(0), m(0), s(0), dow(0),
+_cbAlarm1(nullptr), _cbAlarm2(nullptr), _century(20)
+{
+  Wire.begin(sda, scl);
+}
+#endif
+
 boolean MD_DS3231::checkAlarm1(void)
 // Check the alarm. If time happened then call the callback function and reset the flag
 {
@@ -258,7 +266,7 @@ boolean MD_DS3231::unpackAlarm(uint8_t entryPoint)
       
     case 2:   // Alarm 1 and Alarm 2 registers
       m = BCD2bin(bufRTC[ADDR_MIN]);
-      if (bufRTC[ADDR_CTL_12H] & CTL_12H) 			// 12 hour clock
+      if (bufRTC[ADDR_CTL_12H] & CTL_12H)     // 12 hour clock
       {
         h = BCD2bin(bufRTC[ADDR_HR] & 0x1f);
         pm = (bufRTC[ADDR_CTL_PM] & CTL_PM);
@@ -306,12 +314,12 @@ boolean MD_DS3231::readTime(void)
 // Read the current time from the RTC and unpack it into the object variables
 // return true if the function succeeded
 {
-  readDevice(ADDR_TIME, bufRTC, 7);		// get the data
+  readDevice(ADDR_TIME, bufRTC, 7);   // get the data
 
   // unpack it
   s = BCD2bin(bufRTC[ADDR_SEC]);
   m = BCD2bin(bufRTC[ADDR_MIN]);
-  if (bufRTC[ADDR_CTL_12H] & CTL_12H) 			// 12 hour clock
+  if (bufRTC[ADDR_CTL_12H] & CTL_12H) // 12 hour clock
   {
     h = BCD2bin(bufRTC[ADDR_HR] & 0x1f);
     pm = (bufRTC[ADDR_CTL_PM] & CTL_PM);
@@ -370,6 +378,8 @@ boolean MD_DS3231::packAlarm(uint8_t entryPoint)
           bufRTC[ADDR_CTL_DYDT] &= ~CTL_DYDT;
         }
     }
+
+    return(true);
 }
 
 boolean MD_DS3231::writeAlarm1(almType_t almType)
@@ -400,7 +410,7 @@ boolean MD_DS3231::writeTime(void)
   // pack it up in the current space
   bufRTC[ADDR_SEC] = bin2BCD(s);
   bufRTC[ADDR_MIN] = bin2BCD(m);
-  if (mode12)				// 12 hour clock
+  if (mode12)     // 12 hour clock
   {
     pm = (h > 12);
     if (pm) h -= 12;
@@ -428,19 +438,21 @@ uint8_t MD_DS3231::readRAM(uint8_t addr, uint8_t* buf, uint8_t len)
 // Read len bytes from the RTC, starting at address addr, and put them in buf
 // Reading includes all bytes at addresses RAM_BASE_READ to DS3231_RAM_MAX
 {
-  if ((NULL == buf) || (addr < RAM_BASE_READ) || (len == 0) ||(addr + len - 1 > DS3231_RAM_MAX))
+  if ((NULL == buf) || (addr < RAM_BASE_READ) || 
+      (len == 0) ||(addr + len - 1 > DS3231_RAM_MAX))
     return(0);
 
   CLEAR_BUFFER;
 
-  return(readDevice(addr, buf, len));		// read all the data once
+  return(readDevice(addr, buf, len));   // read all the data once
 }
 
 uint8_t MD_DS3231::writeRAM(uint8_t addr, uint8_t* buf, uint8_t len)
 // Write len bytes from buffer buf to the RTC, starting at address addr
 // Writing includes all bytes at addresses RAM_BASE_READ to DS3231_RAM_MAX
 {
-  if ((NULL == buf) || (addr < RAM_BASE_READ) || (len == 0) || (addr + len - 1 >= DS3231_RAM_MAX))
+  if ((NULL == buf) || (addr < RAM_BASE_READ) || 
+      (len == 0) || (addr + len - 1 >= DS3231_RAM_MAX))
   return(0);
 
   return(writeDevice(addr, buf, len));	// write all the data at once
@@ -606,7 +618,7 @@ boolean MD_DS3231::control(codeRequest_t item, uint8_t value)
       break;
 
     default:
-      return(false);	// parameters were wrong - make no fuss and just go back
+      return(false);  // parameters were wrong - make no fuss and just go back
   }
 
   // now read the address from the RTC
@@ -614,16 +626,16 @@ boolean MD_DS3231::control(codeRequest_t item, uint8_t value)
     return(false);
 
   // do any special processing here
-  if (item == DS3231_12H)		// changing 12/24H clock - special handling of hours conversion
+  if (item == DS3231_12H)   // changing 12/24H clock - special handling of hours conversion
   {
     switch(value)
     {
-      case DS3231_ON:	// change to 12H ...
-        if (!(bufRTC[0] & CTL_12H))	// ... and not in 12H mode
+      case DS3231_ON: // change to 12H ...
+        if (!(bufRTC[0] & CTL_12H)) // ... and not in 12H mode
         {
           uint8_t	hour = BCD2bin(bufRTC[0] & 0x3f);
           
-          if (hour > 12)			// adjust the time, otherwise it looks the same as it does
+          if (hour > 12)      // adjust the time, otherwise it looks the same as it does
           {
             bufRTC[0] = bin2BCD(hour - 12);
             bufRTC[0] |= CTL_PM;
@@ -631,8 +643,8 @@ boolean MD_DS3231::control(codeRequest_t item, uint8_t value)
         }
       break;
 
-      case DS3231_OFF:	// change to 24H ...
-        if ((bufRTC[0] & CTL_12H) && (bufRTC[0] & CTL_PM)) 	// ... not in 24H mode and it is PM
+      case DS3231_OFF:  // change to 24H ...
+        if ((bufRTC[0] & CTL_12H) && (bufRTC[0] & CTL_PM))  // ... not in 24H mode and it is PM
         {
           uint8_t	hour = BCD2bin(bufRTC[0] & 0x1f);
           bufRTC[0] = bin2BCD(hour + 12);
