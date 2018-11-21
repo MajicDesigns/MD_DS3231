@@ -100,11 +100,8 @@ ATTR_USE
 uint8_t MD_DS3231::writeDevice(uint8_t addr, uint8_t* buf, uint8_t len)
 {
   Wire.beginTransmission(DS3231_ID);
-  Wire.write(addr);       // set register address                  
-  for (uint8_t i=0; i<len; i++) // Send x data from given address upwards...
-  {
-    Wire.write(buf[i]);         // ... and send it from buffer
-  }
+  Wire.write(addr);       // set register address 
+  Wire.write(buf, len);   // ... and send it from buffer                 
   Wire.endTransmission();
 
   return(len);
