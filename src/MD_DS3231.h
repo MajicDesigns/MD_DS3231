@@ -172,41 +172,64 @@ The DS3231_LCD_Time example has examples of the different ways of interacting wi
  */
 
 /**
- \def ENABLE_12H
- Set to 1 (default) to enable the AM/PM support. The related
- code cannot be omitted by GCC optimization so if you're not using 
- AMP/PM, disabling 12H support migh give back up to 340 bytes on 
- the final HEX size. Note that if diabled, you should call
- control(DS3231_12H, DS3231_OFF) right after device initialization.
-
- You can change the default by editing this file directly or using a command
- line tool like sed :
- sed "s/^#define ENABLE_12H 1/#define ENABLE_12H 0/" -i MD_DS3231.h
+ * \def ENABLE_12H
+ * Set to 1 (default) to enable the AM/PM support. The related
+ * code cannot be omitted by GCC optimization so if you're not using 
+ * AMP/PM, disabling 12H support migh give back up to 340 bytes on 
+ * the final HEX size. Note that if diabled, you should call
+ * control(DS3231_12H, DS3231_OFF) right after device initialization.
+ * 
+ * You can change the default by editing this file directly or using a command
+ * line tool like sed :
+ * sed "s/^#define ENABLE_12H 1/#define ENABLE_12H 0/" -i MD_DS3231.h
  */
 #define ENABLE_12H 1  ///< Enable 12H (AMP/PM) support
 
 /**
- \def ENABLE_DOW
- Set to 1 (default) to enable Day of Week support. The related
- code cannot be omitted by GCC optimization so disabling day of
- week support if you're not using it might give back up to 212 bytes on
- the final HEX size.
-
- You can change the default by editing this file directly or using a command
- line tool like sed :
- sed "s/^#define ENABLE_DOW 1/#define ENABLE_DOW 0/" -i MD_DS3231.h
+ * \def ENABLE_DOW
+ * Set to 1 (default) to enable Day of Week support. The related
+ * code cannot be omitted by GCC optimization so disabling day of
+ * week support if you're not using it might give back up to 212 bytes on
+ * the final HEX size.
+ *
+ * You can change the default by editing this file directly or using a command
+ * line tool like sed :
+ * sed "s/^#define ENABLE_DOW 1/#define ENABLE_DOW 0/" -i MD_DS3231.h
  */
 #define ENABLE_DOW 1 ///< Enable Day of Week vs Date support
 
 /**
- \def ENABLE_RTC_INSTANCE
- Set to 1 (default) to create a default instance when the library is included.
- It can be useful if you want to extend the MD_DS3231 class without wasting
- space (around 60 bytes) because of a variable declaration you do not use.
+ * \def ENABLE_DYNAMIC_CENTURY
+ * Set to 1 (default) to enable support for dynamic centuries using the setCentury()
+ * and getCentury() methods. 
+ * If disabled, century is hardcoded (via DEFAULT_CENTURY) to 20 which allow working 
+ * with dates from 2000 to 2199.
+ * 
+ * You can disable this to gain 10 bytes of HEX and 2 bytes of RAM. It is only
+ * needed for backward compatility, or if you need to work with dynamic centuries.
+ *
+ * You can change the default by editing this file directly or using a command
+ * line tool like sed :
+ * sed "s/^#define ENABLE_CENTURY 1/#define ENABLE_CENTURY 0/" -i MD_DS3231.h
+ * 
+ * \sa setCentury() method
+ * \sa getCentury() method
+ * \sa DEFAULT_CENTURY
+ */
+#define ENABLE_DYNAMIC_CENTURY 1 ///< Enable support for dynamic century
 
- You can change the default by editing this file directly or using a command
- line tool like sed :
- sed "s/^#define ENABLE_RTC_INSTANCE 1/#define ENABLE_RTC_INSTANCE 0/" -i MD_DS3231.h
+/**
+ * \def ENABLE_RTC_INSTANCE
+ * Set to 1 (default) to create a default instance when the library is included.
+ * It can be useful if you want to extend the MD_DS3231 class without wasting
+ * space (around 60 bytes) because of a variable declaration you do not use.
+ *
+ * You can change the default by editing this file directly or using a command
+ * line tool like sed :
+ * sed "s/^#define ENABLE_RTC_INSTANCE 1/#define ENABLE_RTC_INSTANCE 0/" -i MD_DS3231.h
+ *
+ * \sa setCentury() method.
+ *
  */
 #define ENABLE_RTC_INSTANCE 1 ///< Enable default RTC instance creation
 
@@ -408,7 +431,9 @@ class MD_DS3231
   * \param   c the year base century. Dates will start from (c*100).
   * \return false if errors, true otherwise.
   */
+#if ENABLE_DYNAMIC_CENTURY
   inline boolean setCentury(uint8_t c) { _century = c; return(true); };
+#endif
 
  /**
   * Get the current century for year handling in the library
@@ -419,7 +444,9 @@ class MD_DS3231
   *
   * \return the year base century.
   */
+#if ENABLE_DYNAMIC_CENTURY
   inline uint8_t getCentury(void) { return(_century); };
+#endif
 
  /**
   * Compatibility function - Read the current time
@@ -703,7 +730,9 @@ class MD_DS3231
 private:
   void (*_cbAlarm1)(void);
   void (*_cbAlarm2)(void);
+#if ENABLE_DYNAMIC_CENTURY  
   uint8_t _century;
+#endif
 
   // BCD to binary number packing/unpacking functions
   inline uint8_t BCD2bin(uint8_t v) { return v - 6 * (v >> 4); }

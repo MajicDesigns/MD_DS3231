@@ -79,6 +79,15 @@ class MD_DS3231 RTC;  // one instance created when library is included
 uint8_t bufRTC[MAX_BUF];
 #define CLEAR_BUFFER  { memset(bufRTC, 0, sizeof(bufRTC)); }
 
+#define DEFAULT_CENTURY 20 // Default century used to compute the yyyy interface register
+
+#if ENABLE_CENTURY
+#define CENTURY _century
+#else
+#define CENTURY DEFAULT_CENTURY
+#endif
+
+
 // Interface functions for the RTC device
 ATTR_USE
 uint8_t MD_DS3231::readDevice(uint8_t addr, uint8_t* buf, uint8_t len)
@@ -115,7 +124,10 @@ MD_DS3231::MD_DS3231() : yyyy(0), mm(0), dd(0), h(0), m(0), s(0),
 #if ENABLE_DOW
 dow(0),
 #endif
-_cbAlarm1(nullptr), _cbAlarm2(nullptr), _century(20)
+#if ENABLE_DYNAMIC_CENTURY
+_century(DEFAULT_CENTURY),
+#endif
+_cbAlarm1(nullptr), _cbAlarm2(nullptr)
 {
   Wire.begin();
 }
@@ -125,7 +137,10 @@ MD_DS3231::MD_DS3231(int sda, int scl) : yyyy(0), mm(0), dd(0), h(0), m(0), s(0)
 #if ENABLE_DOW
 dow(0),
 #endif
-_cbAlarm1(nullptr), _cbAlarm2(nullptr), _century(20)
+#if ENABLE_DYNAMIC_CENTURY
+_century(DEFAULT_CENTURY),
+#endif
+_cbAlarm1(nullptr), _cbAlarm2(nullptr) 
 {
   Wire.begin(sda, scl);
 }
@@ -324,7 +339,8 @@ boolean MD_DS3231::readTime(void)
 #endif
   dd = BCD2bin(bufRTC[ADDR_TDATE]);
   mm = BCD2bin(bufRTC[ADDR_MON]);
-  yyyy = BCD2bin(bufRTC[ADDR_YR]) + (_century*100);
+
+  yyyy = BCD2bin(bufRTC[ADDR_YR]) + (CENTURY * 100);
   if (bufRTC[ADDR_CTL_100] & CTL_100)
     yyyy += 100;
 
@@ -432,12 +448,13 @@ boolean MD_DS3231::writeTime(void)
 #endif
   bufRTC[ADDR_TDATE] = bin2BCD(dd);
   bufRTC[ADDR_MON] = bin2BCD(mm);
-  {
-    uint16_t c = (yyyy-2000)/100;  // number of centuries
-    
-    bufRTC[ADDR_YR] = bin2BCD(yyyy - (_century*100) - (100*c));
-    if (c > 0) bufRTC[ADDR_CTL_100] |= CTL_100;
+
+  uint16_t y = yyyy - (CENTURY * 100);
+  if (y > 100) {
+    bufRTC[ADDR_CTL_100] |= CTL_100;
+    y -= 100;
   }
+  bufRTC[ADDR_YR] = bin2BCD(y);
   
   return(writeDevice(ADDR_TIME, bufRTC, 7) == 7);
 }
