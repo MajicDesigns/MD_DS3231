@@ -11,6 +11,14 @@
 #include <Wire.h>
 #include "MD_DS3231.h"
 
+#pragma GGC push_options
+
+#pragma GCC optimize ("no-dce")
+#pragma GCC optimize ("no-tree-dce")
+#define ATTR_USE __attribute__ ((used))
+
+// #define ATTR_USE
+
 class MD_DS3231 RTC;  // one instance created when library is included
 
 // Useful definitions
@@ -70,6 +78,7 @@ uint8_t bufRTC[MAX_BUF];
 #define CLEAR_BUFFER  { memset(bufRTC, 0, sizeof(bufRTC)); }
 
 // Interface functions for the RTC device
+ATTR_USE
 uint8_t MD_DS3231::readDevice(uint8_t addr, uint8_t* buf, uint8_t len)
 {
   Wire.beginTransmission(DS3231_ID);
@@ -87,6 +96,7 @@ uint8_t MD_DS3231::readDevice(uint8_t addr, uint8_t* buf, uint8_t len)
   return(len);
 }
 
+ATTR_USE
 uint8_t MD_DS3231::writeDevice(uint8_t addr, uint8_t* buf, uint8_t len)
 {
   Wire.beginTransmission(DS3231_ID);
@@ -101,6 +111,7 @@ uint8_t MD_DS3231::writeDevice(uint8_t addr, uint8_t* buf, uint8_t len)
 }
 
 // Class functions
+ATTR_USE
 MD_DS3231::MD_DS3231() : yyyy(0), mm(0), dd(0), h(0), m(0), s(0), dow(0),
 _cbAlarm1(nullptr), _cbAlarm2(nullptr), _century(20)
 {
@@ -115,6 +126,7 @@ _cbAlarm1(nullptr), _cbAlarm2(nullptr), _century(20)
 }
 #endif
 
+ATTR_USE
 boolean MD_DS3231::checkAlarm1(void)
 // Check the alarm. If time happened then call the callback function and reset the flag
 {
@@ -129,6 +141,7 @@ boolean MD_DS3231::checkAlarm1(void)
   return(b);
 }
 
+ATTR_USE
 boolean MD_DS3231::checkAlarm2(void)
 // Check the alarm. If time happened then call the callback function and reset the flag
 {
@@ -143,6 +156,7 @@ boolean MD_DS3231::checkAlarm2(void)
   return(b);
 }
 
+ATTR_USE
 boolean MD_DS3231::setAlarm1Type(almType_t almType)
 {
   uint8_t m1, m2, m3, m4, d; // A1M1, A1M2, A1M3, A1M4, DY/~DT
@@ -171,6 +185,7 @@ boolean MD_DS3231::setAlarm1Type(almType_t almType)
   return(writeDevice(ADDR_ALM1, bufRTC, 4) == 4);
 }
 
+ATTR_USE
 almType_t MD_DS3231::getAlarm1Type(void)
 {
   uint8_t m = 0;
@@ -200,6 +215,7 @@ almType_t MD_DS3231::getAlarm1Type(void)
   return(DS3231_ALM_ERROR);
 }
 
+ATTR_USE
 boolean MD_DS3231::setAlarm2Type(almType_t almType)
 {
   uint8_t m2, m3, m4, d; // A2M2, A2M3, A2M4, DY/~DT
@@ -226,6 +242,7 @@ boolean MD_DS3231::setAlarm2Type(almType_t almType)
   return(writeDevice(ADDR_ALM2, bufRTC, 3) == 3);  
 }
 
+ATTR_USE
 almType_t MD_DS3231::getAlarm2Type(void)
 {
   uint8_t m = 0;
@@ -253,6 +270,7 @@ almType_t MD_DS3231::getAlarm2Type(void)
   return(DS3231_ALM_ERROR);
 }
 
+ATTR_USE
 boolean MD_DS3231::unpackAlarm(uint8_t entryPoint)
 // general routine for unpacking alarm registers from device
 // Assumes the buffer is set up as per Alarm 1 registers. For Alarm 2 (missing seconds), 
@@ -290,6 +308,7 @@ boolean MD_DS3231::unpackAlarm(uint8_t entryPoint)
   return(true);
 }
 
+ATTR_USE
 boolean MD_DS3231::readAlarm1(void)
 // Read the current time from the RTC and unpack it into the object variables
 // return true if the function succeeded
@@ -300,6 +319,7 @@ boolean MD_DS3231::readAlarm1(void)
   return(true);
 }
 
+ATTR_USE
 boolean MD_DS3231::readAlarm2(void)
 // Read the current time from the RTC and unpack it into the object variables
 // return true if the function succeeded
@@ -310,6 +330,7 @@ boolean MD_DS3231::readAlarm2(void)
   return(true);
 }
 
+ATTR_USE
 boolean MD_DS3231::readTime(void)
 // Read the current time from the RTC and unpack it into the object variables
 // return true if the function succeeded
@@ -339,6 +360,7 @@ boolean MD_DS3231::readTime(void)
   return(true);
 }
 
+ATTR_USE
 boolean MD_DS3231::packAlarm(uint8_t entryPoint)
 {
     boolean mode12 = (status(DS3231_12H) == DS3231_ON);
@@ -382,6 +404,7 @@ boolean MD_DS3231::packAlarm(uint8_t entryPoint)
     return(true);
 }
 
+ATTR_USE
 boolean MD_DS3231::writeAlarm1(almType_t almType)
 {
   packAlarm(1);
@@ -390,6 +413,7 @@ boolean MD_DS3231::writeAlarm1(almType_t almType)
   return(setAlarm1Type(almType));
 }
 
+ATTR_USE
 boolean MD_DS3231::writeAlarm2(almType_t almType)
 {
   packAlarm(2);
@@ -398,6 +422,7 @@ boolean MD_DS3231::writeAlarm2(almType_t almType)
   return(setAlarm2Type(almType));
 }
 
+ATTR_USE
 boolean MD_DS3231::writeTime(void)
 // Pack up and write the time stored in the object variables to the RTC
 // Note: Setting the time will also start the clock of it is halted
@@ -434,6 +459,7 @@ boolean MD_DS3231::writeTime(void)
   return(writeDevice(ADDR_TIME, bufRTC, 7) == 7);
 }
 
+ATTR_USE
 uint8_t MD_DS3231::readRAM(uint8_t addr, uint8_t* buf, uint8_t len)
 // Read len bytes from the RTC, starting at address addr, and put them in buf
 // Reading includes all bytes at addresses RAM_BASE_READ to DS3231_RAM_MAX
@@ -447,6 +473,7 @@ uint8_t MD_DS3231::readRAM(uint8_t addr, uint8_t* buf, uint8_t len)
   return(readDevice(addr, buf, len));   // read all the data once
 }
 
+ATTR_USE
 uint8_t MD_DS3231::writeRAM(uint8_t addr, uint8_t* buf, uint8_t len)
 // Write len bytes from buffer buf to the RTC, starting at address addr
 // Writing includes all bytes at addresses RAM_BASE_READ to DS3231_RAM_MAX
@@ -458,6 +485,7 @@ uint8_t MD_DS3231::writeRAM(uint8_t addr, uint8_t* buf, uint8_t len)
   return(writeDevice(addr, buf, len));	// write all the data at once
 }
 
+ATTR_USE
 uint8_t MD_DS3231::calcDoW(uint16_t yyyy, uint8_t mm, uint8_t dd) 
 // https://en.wikipedia.org/wiki/Determination_of_the_day_of_the_week
 // This algorithm good for dates  yyyy > 1752 and  1 <= mm <= 12
@@ -470,6 +498,7 @@ uint8_t MD_DS3231::calcDoW(uint16_t yyyy, uint8_t mm, uint8_t dd)
 }
 
 #if ENABLE_TEMP_COMP
+ATTR_USE
 float MD_DS3231::readTempRegister()
 {
   if (readDevice(ADDR_TEMP_REGISTER, bufRTC, 2) != 2)
@@ -479,6 +508,7 @@ float MD_DS3231::readTempRegister()
 }
 #endif
 
+ATTR_USE
 boolean MD_DS3231::control(codeRequest_t item, uint8_t value)
 // Perform a control action on item, using the value
 {
@@ -659,6 +689,7 @@ boolean MD_DS3231::control(codeRequest_t item, uint8_t value)
   return(writeDevice(addr, bufRTC, 1) == 1);
 }
 
+ATTR_USE
 codeStatus_t MD_DS3231::status(codeRequest_t item)
 // Obtain the status of the controllable item and return it.
 // Return DS3231_ERROR otherwise.
@@ -707,3 +738,5 @@ codeStatus_t MD_DS3231::status(codeRequest_t item)
   // any other parameters are single bit ON of OFF
   return((bufRTC[0] & mask) ? DS3231_ON : DS3231_OFF);
 }
+
+#pragma GGC pop_options
