@@ -178,10 +178,9 @@ almType_t MD_DS3231::getAlarm1Type(void)
 
   // create a value with bit 0=M1, 1=M2, 2=M3, 3=M4, 4=D
   uint16_t m = 0;
-  m |= (bufRTC[0] & 0x80) >> 7;
-  m |= (bufRTC[1] & 0x80) >> 6;
-  m |= (bufRTC[2] & 0x80) >> 5;
-  m |= (bufRTC[3] & 0x80) >> 4;
+  for(uint8_t i = 0; i < 4; i++) {
+    m |= (bufRTC[i] & 0x80) >> (7 - i);  
+  }
   m |= (bufRTC[3] & 0x40) >> 2;
 
   return static_cast<almType_t>(m);  
@@ -211,9 +210,9 @@ almType_t MD_DS3231::getAlarm2Type(void)
 
   // create a value with bit 0=M2, 2=M3, 3=M4
   uint8_t m = 0;
-  m |= (bufRTC[0] & 0x80) >> 7;
-  m |= (bufRTC[1] & 0x80) >> 6;
-  m |= (bufRTC[2] & 0x80) >> 5;
+  for(uint8_t i = 0; i < 3; i++) {
+    m |= (bufRTC[i] & 0x80) >> (7 - i);  
+  }
   m |= (bufRTC[2] & 0x40) >> 3;
 
   return static_cast<almType_t>(m | 0x40); //alarm2 types have the sixth bit set
