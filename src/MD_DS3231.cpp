@@ -156,27 +156,15 @@ boolean MD_DS3231::checkAlarm2(void)
 ATTR_USE
 boolean MD_DS3231::setAlarm1Type(almType_t almType)
 {
-  uint8_t m1, m2, m3, m4, d; // A1M1, A1M2, A1M3, A1M4, DY/~DT
-
-  switch (almType)  // set values from the datasheet
-  {
-    case DS3231_ALM_SEC:   d=0; m4=1; m3=1; m2=1; m1=1; break; // 01111
-    case DS3231_ALM_S:     d=0; m4=1; m3=1; m2=1; m1=0; break; // 01110
-    case DS3231_ALM_MS:    d=0; m4=1; m3=1; m2=0; m1=0; break; // 01100
-    case DS3231_ALM_HMS:   d=0; m4=1; m3=0; m2=0; m1=0; break; // 01000
-    case DS3231_ALM_DTHMS: d=0; m4=0; m3=0; m2=0; m1=0; break; // 00000
-    case DS3231_ALM_DDHMS: d=1; m4=0; m3=0; m2=0; m1=0; break; // 10000
-    default:  return(false);
-  }
-
   // read the current data into the buffer
   readDevice(ADDR_ALM1, bufRTC, 4);
 
+  int16_t alm1Type = static_cast<int16_t>(almType);
   // mask in the new data = clear the bit and then set current value
-  bufRTC[0] = (bufRTC[0] & 0x7f) | (m1 << 7);
-  bufRTC[1] = (bufRTC[1] & 0x7f) | (m2 << 7);
-  bufRTC[2] = (bufRTC[2] & 0x7f) | (m3 << 7);
-  bufRTC[3] = (bufRTC[3] & 0x3f) | (m4 << 7) | (d << 6);
+  bufRTC[0] = (bufRTC[0] & 0x7f) | (bitRead(alm1Type, 0) << 7);
+  bufRTC[1] = (bufRTC[1] & 0x7f) | (bitRead(alm1Type, 1) << 7);
+  bufRTC[2] = (bufRTC[2] & 0x7f) | (bitRead(alm1Type, 2) << 7);
+  bufRTC[3] = (bufRTC[3] & 0x3f) | (bitRead(alm1Type, 3) << 7) | (bitRead(alm1Type, 4) << 6);
 
   // write the data back out
   return(writeDevice(ADDR_ALM1, bufRTC, 4) == 4);
@@ -185,55 +173,31 @@ boolean MD_DS3231::setAlarm1Type(almType_t almType)
 ATTR_USE
 almType_t MD_DS3231::getAlarm1Type(void)
 {
-  uint8_t m = 0;
-
   // read the current data into the buffer
-  readDevice(ADDR_ALM1, bufRTC, 4);
+  if(readDevice(ADDR_ALM1, bufRTC, 4) != 4) return DS3231_ALM_ERROR;
 
-  // create a value with bit 0=M1, 1=M2, 2=M3, 3=M4
+  // create a value with bit 0=M1, 1=M2, 2=M3, 3=M4, 4=D
+  uint16_t m = 0;
   m |= (bufRTC[0] & 0x80) >> 7;
   m |= (bufRTC[1] & 0x80) >> 6;
   m |= (bufRTC[2] & 0x80) >> 5;
   m |= (bufRTC[3] & 0x80) >> 4;
+  m |= (bufRTC[3] & 0x40) >> 2;
 
-  switch (m)
-  {
-    case 0x0f: return(DS3231_ALM_SEC);  // 1111
-    case 0x0e: return(DS3231_ALM_S);    // 1110
-    case 0x0c: return(DS3231_ALM_MS);   // 1100
-    case 0x08: return(DS3231_ALM_HMS);  // 1000
-    case 0x00:
-      if (bufRTC[3] & 0x40) // check the D bit
-        return(DS3231_ALM_DDHMS);// 10000
-      else
-        return(DS3231_ALM_DTHMS);// 00000
-  }    
-
-  return(DS3231_ALM_ERROR);
+  return static_cast<almType_t>(m);  
 }
 
 ATTR_USE
 boolean MD_DS3231::setAlarm2Type(almType_t almType)
 {
-  uint8_t m2, m3, m4, d; // A2M2, A2M3, A2M4, DY/~DT
-
-  switch (almType)  // set values from the datasheet
-  {
-    case DS3231_ALM_MIN:   d=0; m4=1; m3=1; m2=1; break; // 0111
-    case DS3231_ALM_M:     d=0; m4=1; m3=1; m2=0; break; // 0110
-    case DS3231_ALM_HM:    d=0; m4=1; m3=0; m2=0; break; // 0100
-    case DS3231_ALM_DTHM:  d=0; m4=0; m3=0; m2=0; break; // 0000
-    case DS3231_ALM_DDHM:  d=1; m4=0; m3=0; m2=0; break; // 1000
-    default:  return(false);
-  }
-
   // read the current data into the buffer
   readDevice(ADDR_ALM2, bufRTC, 3);
 
+  int16_t alm2Type = static_cast<int16_t>(almType);
   // mask in the new data = clear the bit and then set current value
-  bufRTC[0] = (bufRTC[0] & 0x7f) | (m2 << 7);
-  bufRTC[1] = (bufRTC[1] & 0x7f) | (m3 << 7);
-  bufRTC[2] = (bufRTC[2] & 0x3f) | (m4 << 7) | (d << 6);
+  bufRTC[0] = (bufRTC[0] & 0x7f) | (bitRead(alm2Type, 0) << 7);
+  bufRTC[1] = (bufRTC[1] & 0x7f) | (bitRead(alm2Type, 1) << 7);
+  bufRTC[2] = (bufRTC[2] & 0x7f) | (bitRead(alm2Type, 2) << 7) | (bitRead(alm2Type, 3) << 6);;
 
   // write the data back out
   return(writeDevice(ADDR_ALM2, bufRTC, 3) == 3);  
@@ -242,29 +206,17 @@ boolean MD_DS3231::setAlarm2Type(almType_t almType)
 ATTR_USE
 almType_t MD_DS3231::getAlarm2Type(void)
 {
-  uint8_t m = 0;
-
   // read the current data into the buffer
-  readDevice(ADDR_ALM2, bufRTC, 3);
+  if(readDevice(ADDR_ALM2, bufRTC, 3) != 3) return DS3231_ALM_ERROR;
 
   // create a value with bit 0=M2, 2=M3, 3=M4
+  uint8_t m = 0;
   m |= (bufRTC[0] & 0x80) >> 7;
   m |= (bufRTC[1] & 0x80) >> 6;
   m |= (bufRTC[2] & 0x80) >> 5;
+  m |= (bufRTC[2] & 0x40) >> 3;
 
-  switch (m)
-  {
-    case 0x7: return(DS3231_ALM_MIN); // 111
-    case 0x6: return(DS3231_ALM_M);   // 110
-    case 0x4: return(DS3231_ALM_HM);  // 100
-    case 0x0:
-      if (bufRTC[2] & 0x40) // check the D bit
-        return(DS3231_ALM_DDHM);// 1000
-      else
-        return(DS3231_ALM_DTHM);// 0000
-  }
-
-  return(DS3231_ALM_ERROR);
+  return static_cast<almType_t>(m | 0x40); //alarm2 types have the sixth bit set
 }
 
 ATTR_USE
