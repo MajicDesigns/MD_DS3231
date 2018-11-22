@@ -19,7 +19,9 @@
 
 // #define ATTR_USE
 
+#if ENABLE_RTC_INSTANCE
 class MD_DS3231 RTC;  // one instance created when library is included
+#endif
 
 // Useful definitions
 #define DS3231_ID 0x68  // I2C/TWI device address, coded into the device

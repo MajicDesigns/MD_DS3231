@@ -199,6 +199,18 @@ The DS3231_LCD_Time example has examples of the different ways of interacting wi
 #define ENABLE_DOW 1 ///< Enable Day of Week vs Date support
 
 /**
+ \def ENABLE_RTC_INSTANCE
+ Set to 1 (default) to create a default instance when the library is included.
+ It can be useful if you want to extend the MD_DS3231 class without wasting
+ space (around 60 bytes) because of a variable declaration you do not use.
+
+ You can change the default by editing this file directly or using a command
+ line tool like sed :
+ sed "s/^#define ENABLE_RTC_INSTANCE 1/#define ENABLE_RTC_INSTANCE 0/" -i MD_DS3231.h
+ */
+#define ENABLE_RTC_INSTANCE 1 ///< Enable default RTC instance creation
+
+/**
   Control and Status Request enumerated type.
   *
   * This enumerated type is used with the control() and status() methods to identify 
@@ -704,6 +716,8 @@ private:
   uint8_t writeDevice(uint8_t addr, uint8_t* buf, uint8_t len);
 };
 
+#if ENABLE_RTC_INSTANCE
 extern MD_DS3231 RTC;    ///< Library created instance of the RTC class
+#endif
 
 #endif
