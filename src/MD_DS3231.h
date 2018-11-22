@@ -180,13 +180,6 @@ The DS3231_LCD_Time example has examples of the different ways of interacting wi
  control(DS3231_12H, DS3231_OFF) right after device initialization.
  */
 #define ENABLE_12H 1  ///< Enable 12H (AMP/PM) support
-/**
- \def ENABLE_TEMP_COMP
- Set to 1 (default) to enable the temperature comparator related
- functions. The temperature is returned as a floating point number -
- excluding the function(s) may provide some memory gains.
- */
-#define ENABLE_TEMP_COMP  1   ///< Enable temperature compensation functions
 
 /**
   Control and Status Request enumerated type.
@@ -648,7 +641,6 @@ class MD_DS3231
   */
   uint8_t calcDoW(uint16_t yyyy, uint8_t mm, uint8_t dd);
 
-#if ENABLE_TEMP_COMP
  /**
   * Read the temperature register in the RTC
   *
@@ -658,7 +650,6 @@ class MD_DS3231
   * \return the temperature in degrees C.
   */
   float readTempRegister(void);
-#endif
  /** @} */
 
  //--------------------------------------------------------------

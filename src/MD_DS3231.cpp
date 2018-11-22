@@ -460,7 +460,6 @@ uint8_t MD_DS3231::calcDoW(uint16_t yyyy, uint8_t mm, uint8_t dd)
   return ((yyyy + yyyy/4 - yyyy/100 + yyyy/400 + t[mm-1] + dd) % 7) + 1;
 }
 
-#if ENABLE_TEMP_COMP
 ATTR_USE
 float MD_DS3231::readTempRegister()
 {
@@ -469,7 +468,6 @@ float MD_DS3231::readTempRegister()
     
   return(bufRTC[0] + ((bufRTC[1] >> 6) * 0.25));
 }
-#endif
 
 ATTR_USE
 boolean MD_DS3231::control(codeRequest_t item, uint8_t value)
