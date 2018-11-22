@@ -172,6 +172,15 @@ The DS3231_LCD_Time example has examples of the different ways of interacting wi
  */
 
 /**
+ \def ENABLE_12H
+ Set to 1 (default) to enable the AM/PM support. The related
+ code cannot be omitted by GCC optimization so if you're not using 
+ AMP/PM, disabling 12H support migh give back up to 340 bytes on 
+ the final HEX size. Note that if diabled, you should call
+ control(DS3231_12H, DS3231_OFF) right after device initialization.
+ */
+#define ENABLE_12H 1  ///< Enable 12H (AMP/PM) support
+/**
  \def ENABLE_TEMP_COMP
  Set to 1 (default) to enable the temperature comparator related
  functions. The temperature is returned as a floating point number -
@@ -663,7 +672,9 @@ class MD_DS3231
   uint8_t m;    ///< Minutes past the hour (0-59)
   uint8_t s;    ///< Seconds past the minute (0-59)
   uint8_t dow;  ///< Day of the week (1-7). Sequential number; day coding depends on the application and zero is an undefined value
+  #if ENABLE_12H
   uint8_t pm;   ///< Non-zero if 12 hour clock mode and PM, always zero for 24 hour clock. Check the time and if < 12 then check this indicator.
+  #endif
 
   /** @} */
 

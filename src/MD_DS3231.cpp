@@ -233,6 +233,7 @@ boolean MD_DS3231::unpackAlarm(uint8_t entryPoint)
       
     case 2:   // Alarm 1 and Alarm 2 registers
       m = BCD2bin(bufRTC[ADDR_MIN]);
+#if ENABLE_12H
       if (bufRTC[ADDR_CTL_12H] & CTL_12H)     // 12 hour clock
       {
         h = BCD2bin(bufRTC[ADDR_HR] & 0x1f);
@@ -240,10 +241,12 @@ boolean MD_DS3231::unpackAlarm(uint8_t entryPoint)
       } 
       else
       {
+#endif
         h = BCD2bin(bufRTC[ADDR_HR] & 0x3f);
+#if ENABLE_12H
         pm = 0;
       }
-      
+#endif      
       if (bufRTC[ADDR_CTL_DYDT] & CTL_DYDT)   // Day or date?
       {
         dow = BCD2bin(bufRTC[ADDR_DAY] & 0x0f);
@@ -289,6 +292,7 @@ boolean MD_DS3231::readTime(void)
   // unpack it
   s = BCD2bin(bufRTC[ADDR_SEC]);
   m = BCD2bin(bufRTC[ADDR_MIN]);
+#if ENABLE_12H
   if (bufRTC[ADDR_CTL_12H] & CTL_12H) // 12 hour clock
   {
     h = BCD2bin(bufRTC[ADDR_HR] & 0x1f);
@@ -296,9 +300,12 @@ boolean MD_DS3231::readTime(void)
   }
   else
   {
+#endif
     h = BCD2bin(bufRTC[ADDR_HR] & 0x3f);
+#if ENABLE_12H
     pm = 0;
   }
+#endif
   dow = BCD2bin(bufRTC[ADDR_DAY]);
   dd = BCD2bin(bufRTC[ADDR_TDATE]);
   mm = BCD2bin(bufRTC[ADDR_MON]);
@@ -312,7 +319,9 @@ boolean MD_DS3231::readTime(void)
 ATTR_USE
 boolean MD_DS3231::packAlarm(uint8_t entryPoint)
 {
+#if ENABLE_12H
     boolean mode12 = (status(DS3231_12H) == DS3231_ON);
+#endif
 
     CLEAR_BUFFER;
     
@@ -325,6 +334,7 @@ boolean MD_DS3231::packAlarm(uint8_t entryPoint)
         
       case 2:
         bufRTC[ADDR_MIN] = bin2BCD(m);
+#if ENABLE_12H
         if (mode12)     // 12 hour clock
         {
           uint8_t	hour = bin2BCD(h);
@@ -336,6 +346,7 @@ boolean MD_DS3231::packAlarm(uint8_t entryPoint)
           bufRTC[ADDR_CTL_12H] |= CTL_12H;
         }
         else
+#endif        
           bufRTC[ADDR_HR] = bin2BCD(h);
 
         if (dow == 0) // signal that this is a date, not day
@@ -377,13 +388,15 @@ boolean MD_DS3231::writeTime(void)
 // Note: Setting the time will also start the clock of it is halted
 // return true if the function succeeded
 {
+#if ENABLE_12H
   boolean mode12 = (status(DS3231_12H) == DS3231_ON);
-  
+#endif  
   CLEAR_BUFFER;
   
   // pack it up in the current space
   bufRTC[ADDR_SEC] = bin2BCD(s);
   bufRTC[ADDR_MIN] = bin2BCD(m);
+#if ENABLE_12H
   if (mode12)     // 12 hour clock
   {
     pm = (h > 12);
@@ -393,6 +406,7 @@ boolean MD_DS3231::writeTime(void)
     bufRTC[ADDR_CTL_12H] |= CTL_12H;
   }
   else
+#endif
     bufRTC[ADDR_HR] = bin2BCD(h);
     
   bufRTC[ADDR_DAY] = bin2BCD(dow);
@@ -604,6 +618,7 @@ boolean MD_DS3231::control(codeRequest_t item, uint8_t value)
   if (readDevice(addr, bufRTC, 1) != 1)
     return(false);
 
+#if ENABLE_12H
   // do any special processing here
   if (item == DS3231_12H)   // changing 12/24H clock - special handling of hours conversion
   {
@@ -631,6 +646,7 @@ boolean MD_DS3231::control(codeRequest_t item, uint8_t value)
       break;
     }
   }
+#endif
 
   // Mask off the new status, set the value and then write it back
   bufRTC[0] &= ~mask;
