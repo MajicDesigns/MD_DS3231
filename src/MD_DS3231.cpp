@@ -367,7 +367,7 @@ boolean MD_DS3231::packAlarm(uint8_t entryPoint)
         else
           bufRTC[ADDR_HR] = bin2BCD(h);
 
-        if (dow == 0) // signal that this is a date, not day
+        if (dow != 0) // signal that this is a date, not day
         {
           bufRTC[ADDR_DAY] = bin2BCD(dow);
           bufRTC[ADDR_CTL_DYDT] |= CTL_DYDT; 
