@@ -178,6 +178,10 @@ The DS3231_LCD_Time example has examples of the different ways of interacting wi
  AMP/PM, disabling 12H support migh give back up to 340 bytes on 
  the final HEX size. Note that if diabled, you should call
  control(DS3231_12H, DS3231_OFF) right after device initialization.
+
+ You can change the default by editing this file directly or using a command
+ line tool like sed :
+ sed "s/^#define ENABLE_12H 1/#define ENABLE_12H 0/" -i MD_DS3231.h
  */
 #define ENABLE_12H 1  ///< Enable 12H (AMP/PM) support
 
@@ -187,6 +191,10 @@ The DS3231_LCD_Time example has examples of the different ways of interacting wi
  code cannot be omitted by GCC optimization so disabling day of
  week support if you're not using it might give back up to 212 bytes on
  the final HEX size.
+
+ You can change the default by editing this file directly or using a command
+ line tool like sed :
+ sed "s/^#define ENABLE_DOW 1/#define ENABLE_DOW 0/" -i MD_DS3231.h
  */
 #define ENABLE_DOW 1 ///< Enable Day of Week vs Date support
 
