@@ -356,11 +356,12 @@ boolean MD_DS3231::packAlarm(uint8_t entryPoint)
         bufRTC[ADDR_MIN] = bin2BCD(m);
         if (mode12)     // 12 hour clock
         {
-          uint8_t	hour = bin2BCD(h);
-
-          pm = (hour > 12);
-          if (pm) hour -= 12;
-          bufRTC[ADDR_HR] = bin2BCD(hour);
+          if (h > 12) {
+            h -= 12;
+            pm = true;
+          }
+          
+          bufRTC[ADDR_HR] = bin2BCD(h);
           if (pm) bufRTC[ADDR_CTL_PM] |= CTL_PM;
           bufRTC[ADDR_CTL_12H] |= CTL_12H;
         }
@@ -412,8 +413,11 @@ boolean MD_DS3231::writeTime(void)
   bufRTC[ADDR_MIN] = bin2BCD(m);
   if (mode12)     // 12 hour clock
   {
-    pm = (h > 12);
-    if (pm) h -= 12;
+    if (h > 12) {
+      h -= 12;
+      pm = true;
+    }
+    
     bufRTC[ADDR_HR] = bin2BCD(h);
     if (pm) bufRTC[ADDR_CTL_PM] |= CTL_PM;
     bufRTC[ADDR_CTL_12H] |= CTL_12H;
