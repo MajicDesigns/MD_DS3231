@@ -24,7 +24,7 @@ class MD_DS3231 RTC;  // one instance created when library is included
 #endif
 
 // Useful definitions
-#define DS3231_ID 0x68  // I2C/TWI device address, coded into the device
+#define DS3231_ID ((uint8_t)0x68)  // I2C/TWI device address, coded into the device
 
 #define RAM_BASE_READ 0 // smallest read address
 
@@ -97,7 +97,7 @@ uint8_t MD_DS3231::readDevice(uint8_t addr, uint8_t* buf, uint8_t len)
   if (Wire.endTransmission() != 0)
     return(0);
 
-  Wire.requestFrom(DS3231_ID, (int)len);
+  Wire.requestFrom(DS3231_ID, len);
   //while (!Wire.available()) ;   // wait
   for (uint8_t i=0; i<len; i++) // Read x data from given address upwards...
   {
