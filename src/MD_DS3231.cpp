@@ -248,42 +248,36 @@ boolean MD_DS3231::unpackAlarm(uint8_t entryPoint)
 // Assumes the buffer is set up as per Alarm 1 registers. For Alarm 2 (missing seconds), 
 // the first byte of the Alarm data should in byte 1
 {
-  switch(entryPoint)
+  if (entryPoint < 2) s = BCD2bin(bufRTC[ADDR_SEC]);
+  
+  m = BCD2bin(bufRTC[ADDR_MIN]);
+#if ENABLE_12H
+  if (bufRTC[ADDR_CTL_12H] & CTL_12H)     // 12 hour clock
   {
-    case 1:   // Alarm 1 registers
-      s = BCD2bin(bufRTC[ADDR_SEC]);
-      // fall through
-      
-    case 2:   // Alarm 1 and Alarm 2 registers
-      m = BCD2bin(bufRTC[ADDR_MIN]);
-#if ENABLE_12H
-      if (bufRTC[ADDR_CTL_12H] & CTL_12H)     // 12 hour clock
-      {
-        h = BCD2bin(bufRTC[ADDR_HR] & 0x1f);
-        pm = (bufRTC[ADDR_CTL_PM] & CTL_PM);
-      } 
-      else
-      {
+    h = BCD2bin(bufRTC[ADDR_HR] & 0x1f);
+    pm = (bufRTC[ADDR_CTL_PM] & CTL_PM);
+  } 
+  else
+  {
 #endif
-        h = BCD2bin(bufRTC[ADDR_HR] & 0x3f);
+    h = BCD2bin(bufRTC[ADDR_HR] & 0x3f);
 #if ENABLE_12H
-        pm = 0;
-      }
+    pm = 0;
+  }
 #endif
 
 #if ENABLE_DOW
-      if (bufRTC[ADDR_CTL_DYDT] & CTL_DYDT)   // Day or date?
-      {
-        dow = BCD2bin(bufRTC[ADDR_DAY] & 0x0f);
-        dd = 0;
-      } else {
+  if (bufRTC[ADDR_CTL_DYDT] & CTL_DYDT)   // Day or date?
+  {
+    dow = BCD2bin(bufRTC[ADDR_DAY] & 0x0f);
+    dd = 0;
+  } else {
 #endif
-        dd = BCD2bin(bufRTC[ADDR_ADATE] & 0x3f);
+    dd = BCD2bin(bufRTC[ADDR_ADATE] & 0x3f);
 #if ENABLE_DOW
-        dow = 0;
-      }
-#endif
+    dow = 0;
   }
+#endif
 
   return(true);
 }
@@ -351,49 +345,43 @@ ATTR_USE
 boolean MD_DS3231::packAlarm(uint8_t entryPoint)
 {
 #if ENABLE_12H
+    // check what time mode is current
     boolean mode12 = (status(DS3231_12H) == DS3231_ON);
 #endif
 
     CLEAR_BUFFER;
     
-    // check what time mode is current
-    switch (entryPoint)
-    {
-      case 1:
-        bufRTC[ADDR_SEC] = bin2BCD(s);
-        // fall through
-        
-      case 2:
-        bufRTC[ADDR_MIN] = bin2BCD(m);
+    if (entryPoint < 2) bufRTC[ADDR_SEC] = bin2BCD(s);
+    
+    bufRTC[ADDR_MIN] = bin2BCD(m);
 #if ENABLE_12H
-        if (mode12)     // 12 hour clock
-        {
-          uint8_t	hour = bin2BCD(h);
+    if (mode12)     // 12 hour clock
+    {
+      uint8_t	hour = bin2BCD(h);
 
-          pm = (hour > 12);
-          if (pm) hour -= 12;
-          bufRTC[ADDR_HR] = bin2BCD(hour);
-          if (pm) bufRTC[ADDR_CTL_PM] |= CTL_PM;
-          bufRTC[ADDR_CTL_12H] |= CTL_12H;
-        }
-        else
-#endif        
-          bufRTC[ADDR_HR] = bin2BCD(h);
-#if ENABLE_DOW
-        if (dow == 0) // signal that this is a date, not day
-        {
-          bufRTC[ADDR_DAY] = bin2BCD(dow);
-          bufRTC[ADDR_CTL_DYDT] |= CTL_DYDT; 
-        }
-        else
-        {
-#endif          
-          bufRTC[ADDR_ADATE] = bin2BCD(dd);
-          bufRTC[ADDR_CTL_DYDT] &= ~CTL_DYDT;
-#if ENABLE_DOW
-        }
-#endif
+      pm = (hour > 12);
+      if (pm) hour -= 12;
+      bufRTC[ADDR_HR] = bin2BCD(hour);
+      if (pm) bufRTC[ADDR_CTL_PM] |= CTL_PM;
+      bufRTC[ADDR_CTL_12H] |= CTL_12H;
     }
+    else
+#endif        
+      bufRTC[ADDR_HR] = bin2BCD(h);
+#if ENABLE_DOW
+    if (dow == 0) // signal that this is a date, not day
+    {
+      bufRTC[ADDR_DAY] = bin2BCD(dow);
+      bufRTC[ADDR_CTL_DYDT] |= CTL_DYDT; 
+    }
+    else
+    {
+#endif          
+      bufRTC[ADDR_ADATE] = bin2BCD(dd);
+      bufRTC[ADDR_CTL_DYDT] &= ~CTL_DYDT;
+#if ENABLE_DOW
+    }
+#endif
 
     return(true);
 }
