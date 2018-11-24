@@ -182,6 +182,15 @@ The DS3231_LCD_Time example has examples of the different ways of interacting wi
 #define ENABLE_12H 1  ///< Enable 12H (AMP/PM) support
 
 /**
+ \def ENABLE_DOW
+ Set to 1 (default) to enable Day of Week support. The related
+ code cannot be omitted by GCC optimization so disabling day of
+ week support if you're not using it might give back up to 212 bytes on
+ the final HEX size.
+ */
+#define ENABLE_DOW 1 ///< Enable Day of Week vs Date support
+
+/**
   Control and Status Request enumerated type.
   *
   * This enumerated type is used with the control() and status() methods to identify 
@@ -662,7 +671,9 @@ class MD_DS3231
   uint8_t h;    ///< Hour of the day (1-12) or (0-23) depending on the am/pm or 24h mode setting
   uint8_t m;    ///< Minutes past the hour (0-59)
   uint8_t s;    ///< Seconds past the minute (0-59)
+  #if ENABLE_DOW
   uint8_t dow;  ///< Day of the week (1-7). Sequential number; day coding depends on the application and zero is an undefined value
+  #endif
   #if ENABLE_12H
   uint8_t pm;   ///< Non-zero if 12 hour clock mode and PM, always zero for 24 hour clock. Check the time and if < 12 then check this indicator.
   #endif

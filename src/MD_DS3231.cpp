@@ -109,14 +109,20 @@ uint8_t MD_DS3231::writeDevice(uint8_t addr, uint8_t* buf, uint8_t len)
 
 // Class functions
 ATTR_USE
-MD_DS3231::MD_DS3231() : yyyy(0), mm(0), dd(0), h(0), m(0), s(0), dow(0),
+MD_DS3231::MD_DS3231() : yyyy(0), mm(0), dd(0), h(0), m(0), s(0), 
+#if ENABLE_DOW
+dow(0),
+#endif
 _cbAlarm1(nullptr), _cbAlarm2(nullptr), _century(20)
 {
   Wire.begin();
 }
 
 #ifdef ESP8266
-MD_DS3231::MD_DS3231(int sda, int scl) : yyyy(0), mm(0), dd(0), h(0), m(0), s(0), dow(0),
+MD_DS3231::MD_DS3231(int sda, int scl) : yyyy(0), mm(0), dd(0), h(0), m(0), s(0), 
+#if ENABLE_DOW
+dow(0),
+#endif
 _cbAlarm1(nullptr), _cbAlarm2(nullptr), _century(20)
 {
   Wire.begin(sda, scl);
@@ -246,15 +252,20 @@ boolean MD_DS3231::unpackAlarm(uint8_t entryPoint)
 #if ENABLE_12H
         pm = 0;
       }
-#endif      
+#endif
+
+#if ENABLE_DOW
       if (bufRTC[ADDR_CTL_DYDT] & CTL_DYDT)   // Day or date?
       {
         dow = BCD2bin(bufRTC[ADDR_DAY] & 0x0f);
         dd = 0;
       } else {
+#endif
         dd = BCD2bin(bufRTC[ADDR_ADATE] & 0x3f);
+#if ENABLE_DOW
         dow = 0;
       }
+#endif
   }
 
   return(true);
@@ -306,7 +317,9 @@ boolean MD_DS3231::readTime(void)
     pm = 0;
   }
 #endif
+#if ENABLE_DOW
   dow = BCD2bin(bufRTC[ADDR_DAY]);
+#endif
   dd = BCD2bin(bufRTC[ADDR_TDATE]);
   mm = BCD2bin(bufRTC[ADDR_MON]);
   yyyy = BCD2bin(bufRTC[ADDR_YR]) + (_century*100);
@@ -348,7 +361,7 @@ boolean MD_DS3231::packAlarm(uint8_t entryPoint)
         else
 #endif        
           bufRTC[ADDR_HR] = bin2BCD(h);
-
+#if ENABLE_DOW
         if (dow == 0) // signal that this is a date, not day
         {
           bufRTC[ADDR_DAY] = bin2BCD(dow);
@@ -356,9 +369,12 @@ boolean MD_DS3231::packAlarm(uint8_t entryPoint)
         }
         else
         {
+#endif          
           bufRTC[ADDR_ADATE] = bin2BCD(dd);
           bufRTC[ADDR_CTL_DYDT] &= ~CTL_DYDT;
+#if ENABLE_DOW
         }
+#endif
     }
 
     return(true);
@@ -409,7 +425,9 @@ boolean MD_DS3231::writeTime(void)
 #endif
     bufRTC[ADDR_HR] = bin2BCD(h);
     
+#if ENABLE_DOW
   bufRTC[ADDR_DAY] = bin2BCD(dow);
+#endif
   bufRTC[ADDR_TDATE] = bin2BCD(dd);
   bufRTC[ADDR_MON] = bin2BCD(mm);
   {
