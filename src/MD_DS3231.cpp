@@ -491,10 +491,12 @@ uint8_t MD_DS3231::calcDoW(uint16_t yyyy, uint8_t mm, uint8_t dd)
 // This algorithm good for dates  yyyy > 1752 and  1 <= mm <= 12
 // Returns dow  01 - 07, 01 = Sunday
 {
-  static int t[] = {0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4};
+  static const uint8_t ts[] PROGMEM = {0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4};
+  uint8_t t;
+  memcpy_P(&t, &ts[mm - 1], 1);
     
   yyyy -= mm < 3;
-  return ((yyyy + yyyy/4 - yyyy/100 + yyyy/400 + t[mm-1] + dd) % 7) + 1;
+  return ((yyyy + yyyy/4 - yyyy/100 + yyyy/400 + t + dd) % 7) + 1;
 }
 
 ATTR_USE
