@@ -11,7 +11,7 @@
 
 void setup()
 {
-  Serial.begin(57600);
+  Serial.begin(38400);
   usage();
   RTC.setAlarm1Callback(cbAlarm1);
   RTC.setAlarm2Callback(cbAlarm2);
