@@ -309,7 +309,7 @@ enum codeStatus_t
   */
 enum almType_t
 {
- DS3231_ALM_ERROR   = -1,         ///< An error occurred executing the requested action
+ DS3231_ALM_ERROR   = -1,             ///< An error occurred executing the requested action
  DS3231_ALM_SEC     = 0b00001111,     ///< Alarm once per second (alm 1 only)
  DS3231_ALM_S       = 0b00001110,     ///< Alarm when seconds match (alm 1 only)
  DS3231_ALM_MIN     = 0b01000111,     ///< Alarm once per minute (alm 2 only)
@@ -318,9 +318,9 @@ enum almType_t
  DS3231_ALM_HM      = 0b01000100,     ///< Alarm when hours and minutes match (alm 2 only)
  DS3231_ALM_HMS     = 0b00001000,     ///< Alarm when hours, minutes and seconds match (alm 1 only)
  DS3231_ALM_DTHM    = 0b01000000,     ///< Alarm when date, hours and minutes match (alm 2 only)
- DS3231_ALM_DTHMS   = 0b00000000,    ///< Alarm when date, hours, minutes and seconds match (alm 1 only)
+ DS3231_ALM_DTHMS   = 0b00000000,     ///< Alarm when date, hours, minutes and seconds match (alm 1 only)
  DS3231_ALM_DDHM    = 0b01001000,     ///< Alarm when day, hours and minutes match (alm 2 only)
- DS3231_ALM_DDHMS   = 0b00010000,   ///< Alarm when day, hours, minutes and seconds match (alm 1 only)
+ DS3231_ALM_DDHMS   = 0b00010000,     ///< Alarm when day, hours, minutes and seconds match (alm 1 only)
 };
 
 /**

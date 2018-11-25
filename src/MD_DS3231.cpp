@@ -183,10 +183,11 @@ boolean MD_DS3231::setAlarm1Type(almType_t almType)
   readDevice(ADDR_ALM1, bufRTC, 4);
 
   int16_t alm1Type = static_cast<int16_t>(almType);
-  // mask in the new data = clear the bit and then set current value
+  // split each bit of almType to the seventh bit
   for(uint8_t i = 0; i < 4; i++) {
     bitWrite(bufRTC[i], 7, bitRead(alm1Type, i));
   }
+  // set the D bit
   bitWrite(bufRTC[3], 6, bitRead(alm1Type, 4));
 
   // write the data back out
@@ -199,7 +200,7 @@ almType_t MD_DS3231::getAlarm1Type(void)
   // read the current data into the buffer
   if(readDevice(ADDR_ALM1, bufRTC, 4) != 4) return DS3231_ALM_ERROR;
 
-  // create a value with bit 0=M1, 1=M2, 2=M3, 3=M4, 4=D
+  // create a value with bits 0=M1, 1=M2, 2=M3, 3=M4, 4=D
   uint16_t m = 0;
   for(uint8_t i = 0; i < 4; i++) {
     m |= (bufRTC[i] & 0x80) >> (7 - i);  
@@ -216,10 +217,11 @@ boolean MD_DS3231::setAlarm2Type(almType_t almType)
   readDevice(ADDR_ALM2, bufRTC, 3);
 
   int16_t alm2Type = static_cast<int16_t>(almType);
-  // mask in the new data = clear the bit and then set current value
+  // split each bit of almType to the seventh bit
   for(uint8_t i = 0; i < 3; i++) {
     bitWrite(bufRTC[i], 7, bitRead(alm2Type, i));
   }
+  // set the D bit
   bitWrite(bufRTC[2], 6, bitRead(alm2Type, 3));
 
   // write the data back out
@@ -232,7 +234,7 @@ almType_t MD_DS3231::getAlarm2Type(void)
   // read the current data into the buffer
   if(readDevice(ADDR_ALM2, bufRTC, 3) != 3) return DS3231_ALM_ERROR;
 
-  // create a value with bit 0=M2, 2=M3, 3=M4
+  // create a value with bits 0=M2, 1=M3, 2=M4, 4=D
   uint8_t m = 0;
   for(uint8_t i = 0; i < 3; i++) {
     m |= (bufRTC[i] & 0x80) >> (7 - i);  
