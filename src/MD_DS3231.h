@@ -38,6 +38,9 @@ ___
 
 Revision History 
 ----------------
+Dec 2018 version 1.3.0
+- Memory footprint reduced contributed by blemasle (Pull request #9)
+
 Dec 2018 version 1.2.5
 - Fixes contributed by blemasle (issue #8)
   + In packAlarm, the DD/DY condition was reversed
