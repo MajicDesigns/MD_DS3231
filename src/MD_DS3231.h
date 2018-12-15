@@ -180,12 +180,66 @@ The DS3231_LCD_Time example has examples of the different ways of interacting wi
  */
 
 /**
- \def ENABLE_TEMP_COMP
- Set to 1 (default) to enable the temperature comparator related
- functions. The temperature is returned as a floating point number -
- excluding the function(s) may provide some memory gains.
+ * \def ENABLE_12H
+ * Set to 1 (default) to enable the AM/PM support. The related
+ * code cannot be omitted by GCC optimization so if you're not using 
+ * AMP/PM, disabling 12H support migh give back up to 340 bytes on 
+ * the final HEX size. Note that if diabled, you should call
+ * control(DS3231_12H, DS3231_OFF) right after device initialization.
+ * 
+ * You can change the default by editing this file directly or using a command
+ * line tool like sed :
+ * sed "s/^#define ENABLE_12H 1/#define ENABLE_12H 0/" -i MD_DS3231.h
  */
-#define ENABLE_TEMP_COMP  1   ///< Enable temperature compensation functions
+#define ENABLE_12H 1  ///< Enable 12H (AMP/PM) support
+
+/**
+ * \def ENABLE_DOW
+ * Set to 1 (default) to enable Day of Week support. The related
+ * code cannot be omitted by GCC optimization so disabling day of
+ * week support if you're not using it might give back up to 212 bytes on
+ * the final HEX size.
+ *
+ * You can change the default by editing this file directly or using a command
+ * line tool like sed :
+ * sed "s/^#define ENABLE_DOW 1/#define ENABLE_DOW 0/" -i MD_DS3231.h
+ */
+#define ENABLE_DOW 1 ///< Enable Day of Week vs Date support
+
+/**
+ * \def ENABLE_DYNAMIC_CENTURY
+ * Set to 1 (default) to enable support for dynamic centuries using the setCentury()
+ * and getCentury() methods. 
+ * If disabled, century is hardcoded (via DEFAULT_CENTURY) to 20 which allow working 
+ * with dates from 2000 to 2199.
+ * 
+ * You can disable this to gain 10 bytes of HEX and 2 bytes of RAM. It is only
+ * needed for backward compatility, or if you need to work with dynamic centuries.
+ *
+ * You can change the default by editing this file directly or using a command
+ * line tool like sed :
+ * sed "s/^#define ENABLE_CENTURY 1/#define ENABLE_CENTURY 0/" -i MD_DS3231.h
+ * 
+ * \sa setCentury() method
+ * \sa getCentury() method
+ * \sa DEFAULT_CENTURY
+ */
+#define ENABLE_DYNAMIC_CENTURY 1 ///< Enable support for dynamic century
+
+/**
+ * \def ENABLE_RTC_INSTANCE
+ * Set to 1 (default) to create a default instance when the library is included.
+ * It can be useful if you want to extend the MD_DS3231 class without wasting
+ * space (around 60 bytes) because of a variable declaration you do not use.
+ *
+ * You can change the default by editing this file directly or using a command
+ * line tool like sed :
+ * sed "s/^#define ENABLE_RTC_INSTANCE 1/#define ENABLE_RTC_INSTANCE 0/" -i MD_DS3231.h
+ *
+ * \sa setCentury() method.
+ *
+ */
+#define ENABLE_RTC_INSTANCE 1 ///< Enable default RTC instance creation
 
 /**
   Control and Status Request enumerated type.
@@ -261,20 +315,20 @@ enum codeStatus_t
   * This enumerated type is used to set and inspect the alarm types
    * for Alarms 1 and 2 using the setAlarmType() and getAlarmType() methods.
   */
-enum almType_t 
+enum almType_t
 {
- DS3231_ALM_ERROR,   ///< An error occurred executing the requested action
- DS3231_ALM_SEC,     ///< Alarm once per second (alm 1 only)
- DS3231_ALM_S,       ///< Alarm when seconds match (alm 1 only)
- DS3231_ALM_MIN,     ///< Alarm once per minute (alm 2 only)
- DS3231_ALM_M,       ///< Alarm when minutes match (alm 2 only)
- DS3231_ALM_MS,      ///< Alarm when minutes and seconds match (alm 1 only)
- DS3231_ALM_HM,      ///< Alarm when hours and minutes match (alm 2 only)
- DS3231_ALM_HMS,     ///< Alarm when hours, minutes and seconds match (alm 1 only)
- DS3231_ALM_DTHM,    ///< Alarm when date, hours and minutes match (alm 2 only)
- DS3231_ALM_DTHMS,   ///< Alarm when date, hours, minutes and seconds match (alm 1 only)
- DS3231_ALM_DDHM,    ///< Alarm when day, hours and minutes match (alm 2 only)
- DS3231_ALM_DDHMS,   ///< Alarm when day, hours, minutes and seconds match (alm 1 only)
+ DS3231_ALM_ERROR   = -1,             ///< An error occurred executing the requested action
+ DS3231_ALM_SEC     = 0b00001111,     ///< Alarm once per second (alm 1 only)
+ DS3231_ALM_S       = 0b00001110,     ///< Alarm when seconds match (alm 1 only)
+ DS3231_ALM_MIN     = 0b01000111,     ///< Alarm once per minute (alm 2 only)
+ DS3231_ALM_M       = 0b01000110,     ///< Alarm when minutes match (alm 2 only)
+ DS3231_ALM_MS      = 0b00001100,     ///< Alarm when minutes and seconds match (alm 1 only)
+ DS3231_ALM_HM      = 0b01000100,     ///< Alarm when hours and minutes match (alm 2 only)
+ DS3231_ALM_HMS     = 0b00001000,     ///< Alarm when hours, minutes and seconds match (alm 1 only)
+ DS3231_ALM_DTHM    = 0b01000000,     ///< Alarm when date, hours and minutes match (alm 2 only)
+ DS3231_ALM_DTHMS   = 0b00000000,     ///< Alarm when date, hours, minutes and seconds match (alm 1 only)
+ DS3231_ALM_DDHM    = 0b01001000,     ///< Alarm when day, hours and minutes match (alm 2 only)
+ DS3231_ALM_DDHMS   = 0b00010000,     ///< Alarm when day, hours, minutes and seconds match (alm 1 only)
 };
 
 /**
@@ -385,7 +439,9 @@ class MD_DS3231
   * \param   c the year base century. Dates will start from (c*100).
   * \return false if errors, true otherwise.
   */
+#if ENABLE_DYNAMIC_CENTURY
   inline boolean setCentury(uint8_t c) { _century = c; return(true); };
+#endif
 
  /**
   * Get the current century for year handling in the library
@@ -396,7 +452,9 @@ class MD_DS3231
   *
   * \return the year base century.
   */
+#if ENABLE_DYNAMIC_CENTURY
   inline uint8_t getCentury(void) { return(_century); };
+#endif
 
  /**
   * Compatibility function - Read the current time
@@ -647,7 +705,6 @@ class MD_DS3231
   */
   uint8_t calcDoW(uint16_t yyyy, uint8_t mm, uint8_t dd);
 
-#if ENABLE_TEMP_COMP
  /**
   * Read the temperature register in the RTC
   *
@@ -657,7 +714,6 @@ class MD_DS3231
   * \return the temperature in degrees C.
   */
   float readTempRegister(void);
-#endif
  /** @} */
 
  //--------------------------------------------------------------
@@ -670,15 +726,21 @@ class MD_DS3231
   uint8_t h;    ///< Hour of the day (1-12) or (0-23) depending on the am/pm or 24h mode setting
   uint8_t m;    ///< Minutes past the hour (0-59)
   uint8_t s;    ///< Seconds past the minute (0-59)
+  #if ENABLE_DOW
   uint8_t dow;  ///< Day of the week (1-7). Sequential number; day coding depends on the application and zero is an undefined value
+  #endif
+  #if ENABLE_12H
   uint8_t pm;   ///< Non-zero if 12 hour clock mode and PM, always zero for 24 hour clock. Check the time and if < 12 then check this indicator.
+  #endif
 
   /** @} */
 
 private:
   void (*_cbAlarm1)(void);
   void (*_cbAlarm2)(void);
+#if ENABLE_DYNAMIC_CENTURY  
   uint8_t _century;
+#endif
 
   // BCD to binary number packing/unpacking functions
   inline uint8_t BCD2bin(uint8_t v) { return v - 6 * (v >> 4); }
@@ -691,6 +753,8 @@ private:
   uint8_t writeDevice(uint8_t addr, uint8_t* buf, uint8_t len);
 };
 
+#if ENABLE_RTC_INSTANCE
 extern MD_DS3231 RTC;    ///< Library created instance of the RTC class
+#endif
 
 #endif
