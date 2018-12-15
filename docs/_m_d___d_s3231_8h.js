@@ -2,7 +2,10 @@ var _m_d___d_s3231_8h =
 [
     [ "MD_DS3231", "class_m_d___d_s3231.html", "class_m_d___d_s3231" ],
     [ "DS3231_RAM_MAX", "_m_d___d_s3231_8h.html#a3d34a91e1e11692a21b7434618c31f41", null ],
-    [ "ENABLE_TEMP_COMP", "_m_d___d_s3231_8h.html#a372650e3972ee2cf65789aac83445d81", null ],
+    [ "ENABLE_12H", "_m_d___d_s3231_8h.html#a16a3c1ce99a9542d7602f81ae45bfd0b", null ],
+    [ "ENABLE_DOW", "_m_d___d_s3231_8h.html#a7b3554255d2319edc07617a001be2265", null ],
+    [ "ENABLE_DYNAMIC_CENTURY", "_m_d___d_s3231_8h.html#a79e2814e13db5c4de0fe85009365f944", null ],
+    [ "ENABLE_RTC_INSTANCE", "_m_d___d_s3231_8h.html#ad04297e04940ad99d930270c818b26d2", null ],
     [ "almType_t", "_m_d___d_s3231_8h.html#ad3a3a448e61d278a8b729c41aa05088f", [
       [ "DS3231_ALM_ERROR", "_m_d___d_s3231_8h.html#ad3a3a448e61d278a8b729c41aa05088fa9ebe92265fff230b4ffd75e74529d32d", null ],
       [ "DS3231_ALM_SEC", "_m_d___d_s3231_8h.html#ad3a3a448e61d278a8b729c41aa05088fad7403cd7ca2e8e043de3fde7e3418392", null ],
