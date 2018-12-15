@@ -337,11 +337,12 @@ boolean MD_DS3231::packAlarm(uint8_t entryPoint)
 #if ENABLE_12H
     if (mode12)     // 12 hour clock
     {
-      uint8_t	hour = bin2BCD(h);
-
-      pm = (hour > 12);
-      if (pm) hour -= 12;
-      bufRTC[ADDR_HR] = bin2BCD(hour);
+      if (h > 12) {
+        h -= 12;
+        pm = true;
+      }
+          
+      bufRTC[ADDR_HR] = bin2BCD(h);
       if (pm) bufRTC[ADDR_CTL_PM] |= CTL_PM;
       bufRTC[ADDR_CTL_12H] |= CTL_12H;
     }
@@ -349,7 +350,7 @@ boolean MD_DS3231::packAlarm(uint8_t entryPoint)
 #endif        
       bufRTC[ADDR_HR] = bin2BCD(h);
 #if ENABLE_DOW
-    if (dow == 0) // signal that this is a date, not day
+    if (dow != 0) // signal that this is a date, not day
     {
       bufRTC[ADDR_DAY] = bin2BCD(dow);
       bufRTC[ADDR_CTL_DYDT] |= CTL_DYDT; 
@@ -398,8 +399,11 @@ boolean MD_DS3231::writeTime(void)
 #if ENABLE_12H
   if (mode12)     // 12 hour clock
   {
-    pm = (h > 12);
-    if (pm) h -= 12;
+    if (h > 12) {
+      h -= 12;
+      pm = true;
+    }
+    
     bufRTC[ADDR_HR] = bin2BCD(h);
     if (pm) bufRTC[ADDR_CTL_PM] |= CTL_PM;
     bufRTC[ADDR_CTL_12H] |= CTL_12H;

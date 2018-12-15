@@ -28,6 +28,8 @@ This library features access to all on-chip features
 - Control of square wave generator (on/off & frequency)
 - Control of clock features (Square Wave type and on/off, 12/24H, day of week, etc)
 
+If you like and use this library please consider making a small donation using [PayPal](https://paypal.me/MajicDesigns/4USD)
+
 ___
 
 \subpage pageSoftware
@@ -36,6 +38,12 @@ ___
 
 Revision History 
 ----------------
+Dec 2018 version 1.2.5
+- Fixes contributed by blemasle (issue #8)
+  + In packAlarm, the DD/DY condition was reversed
+  + packAlarm BCD encoded the hour to early
+  + When using 12H clock mode, pm indicator was overwritten by packAlarm and writeTime. Additionally, can now use both 5PM and 17 format
+
 Jun 2018 version 1.2.4
 - Fixed compiler warnings
 - Added overloaded constructor for ESP8266
@@ -299,7 +307,7 @@ enum codeStatus_t
 }; 
 
 // Device parameters
-#define	DS3231_RAM_MAX		19	///< Total number of RAM registers that can be read from the device
+#define DS3231_RAM_MAX  19  ///< Total number of RAM registers that can be read from the device
 
 /**
   * Alarm Type specifier enumerated type.
