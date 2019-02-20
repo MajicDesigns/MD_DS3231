@@ -370,7 +370,7 @@ boolean MD_DS3231::packAlarm(uint8_t entryPoint)
 boolean MD_DS3231::writeAlarm1(almType_t almType)
 {
   packAlarm(1);
-  if (!writeDevice(ADDR_ALM1, bufRTC, 4) == 4)
+  if (writeDevice(ADDR_ALM1, bufRTC, 4) != 4)
     return(false);
   return(setAlarm1Type(almType));
 }
@@ -378,7 +378,7 @@ boolean MD_DS3231::writeAlarm1(almType_t almType)
 boolean MD_DS3231::writeAlarm2(almType_t almType)
 {
   packAlarm(2);
-  if (!writeDevice(ADDR_ALM2, &bufRTC[1], 3) == 3)
+  if (writeDevice(ADDR_ALM2, &bufRTC[1], 3) != 3)
     return(false);
   return(setAlarm2Type(almType));
 }

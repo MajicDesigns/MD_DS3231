@@ -38,6 +38,9 @@ ___
 
 Revision History 
 ----------------
+Feb 2019 version 1.3.1
+- Fixed incorrect writeDevice logical expression (issue #10)
+
 Dec 2018 version 1.3.0
 - Memory footprint reduced contributed by blemasle (Pull request #9)
 
