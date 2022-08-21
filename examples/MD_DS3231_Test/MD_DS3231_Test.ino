@@ -2,16 +2,20 @@
 //
 // Test the library and control all aspects of the RTC chip functions
 // using from the serial monitor.
+//
+// Dependencies:
+// MD_cmdProcessor library available from https://github.com/MajicDesigns/MD_DS3231
 
-#include <MD_DS3231.h>
 #include <Wire.h>
+#include <MD_DS3231.h>
+#include <MD_cmdProcessor.h>
 
 #define PRINTS(s)   Serial.print(F(s))
 #define PRINT(s, v) { Serial.print(F(s)); Serial.print(v); }
 
 void setup()
 {
-  Serial.begin(38400);
+  Serial.begin(57600);
   usage();
   RTC.setAlarm1Callback(cbAlarm1);
   RTC.setAlarm2Callback(cbAlarm2);

@@ -51,7 +51,7 @@ class MD_DS3231 RTC;  // one instance created when library is included
 #define ADDR_TEMP_REGISTER    0x11
 
 // Bit masks for the control/testable bits
-// See the IC datasheet for the definitions of these bits
+// See the IC data sheet for the definitions of these bits
 #define CTL_EOSC  0x80  // Enable Oscillator - bit 7 control register
 #define CTL_BBSQWE 0x40 // Battery Backed Square Wave Enable - bit 6 control register
 #define CTL_CONV  0x20  // Convert Temperature - bit 5 control register
@@ -113,10 +113,10 @@ MD_DS3231::MD_DS3231() : yyyy(0), mm(0), dd(0), h(0), m(0), s(0),
 #if ENABLE_DOW
 dow(0),
 #endif
+_cbAlarm1(nullptr), _cbAlarm2(nullptr),
 #if ENABLE_DYNAMIC_CENTURY
-_century(DEFAULT_CENTURY),
+_century(DEFAULT_CENTURY)
 #endif
-_cbAlarm1(nullptr), _cbAlarm2(nullptr)
 {
   Wire.begin();
 }

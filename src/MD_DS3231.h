@@ -38,6 +38,9 @@ ___
 
 Revision History 
 ----------------
+Aug 2022 version 1.3.2
+- Fixed compiler warning about out of order initializers
+
 Feb 2019 version 1.3.1
 - Fixed incorrect writeDevice logical expression (issue #10)
 
@@ -164,7 +167,7 @@ no callback function is defined, the return status from the checkAlarm1() or che
 
 - _Interrupt Alarms_ are configured by invoking the control() method to enable interrupts (INT_ENABLE), followed 
 by enabling the interrupt for the required alarm (A1_INT_ENABLE or A2_INT_ENABLE). The alarm flag (control() with 
-A1FLAG or A2_FLAG) should be rest to initialise a 'zero' start for the interrupt cycles. Once the interrupt cycle has 
+A1FLAG or A2_FLAG) should be rest to initialize a 'zero' start for the interrupt cycles. Once the interrupt cycle has 
 completed, the alarm flag must be reset to re-enable the interrupt (control() with parameter A1_FLAG or A2_FLAG).
 The interrupt handler must be set up externally from the library and the hardware properly configured to accept the 
 interrupt. Note, however:
@@ -189,8 +192,8 @@ The DS3231_LCD_Time example has examples of the different ways of interacting wi
  * \def ENABLE_12H
  * Set to 1 (default) to enable the AM/PM support. The related
  * code cannot be omitted by GCC optimization so if you're not using 
- * AMP/PM, disabling 12H support migh give back up to 340 bytes on 
- * the final HEX size. Note that if diabled, you should call
+ * AMP/PM, disabling 12H support might give back up to 340 bytes on 
+ * the final HEX size. Note that if disabled, you should call
  * control(DS3231_12H, DS3231_OFF) right after device initialization.
  * 
  * You can change the default by editing this file directly or using a command
@@ -216,11 +219,11 @@ The DS3231_LCD_Time example has examples of the different ways of interacting wi
  * \def ENABLE_DYNAMIC_CENTURY
  * Set to 1 (default) to enable support for dynamic centuries using the setCentury()
  * and getCentury() methods. 
- * If disabled, century is hardcoded (via DEFAULT_CENTURY) to 20 which allow working 
+ * If disabled, century is hard coded (via DEFAULT_CENTURY) to 20 which allow working 
  * with dates from 2000 to 2199.
  * 
  * You can disable this to gain 10 bytes of HEX and 2 bytes of RAM. It is only
- * needed for backward compatility, or if you need to work with dynamic centuries.
+ * needed for backward compatibility, or if you need to work with dynamic centuries.
  *
  * You can change the default by editing this file directly or using a command
  * line tool like sed :
@@ -468,8 +471,6 @@ class MD_DS3231
   * Wrapper to read the current time.
   *
   * \sa readTime() method
-  *
-  * \return no return value.
   */
   void now(void) { readTime(); }
 

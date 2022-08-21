@@ -24,5 +24,4 @@ Explain what happens instead. Provide log messages if relevant.
 
 ## Code Demonstrating the Issue
 ````
-Insert your code here.
-````
+Insert your compilable code here (no code fragments).````
