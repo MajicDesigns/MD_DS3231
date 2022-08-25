@@ -10,23 +10,33 @@
 // Alarm triggered will play a tone on a piezo speaker on BUZZER_PIN.
 //
 // Dependencies
-// MD_AButton library located at https://github.com/MajicDesigns/MD_AButton
+// MD_UISwitch library located at https://github.com/MajicDesigns/MD_UISwitch
 //
 #include <Wire.h>
 #include <LiquidCrystal.h>
 #include <MD_DS3231.h>
-#include <MD_AButton.h>
+#include <MD_UISwitch.h>
 
 // Define as 1 if alarm time to be initialised from variables, otherwise use RTC values
 #define INIT_ALM_DEFAULTS 0
 
 // Hardware definitions
-#define BUZZER_PIN  2               // digital pin for tone buzzer
-#define ANALOG_SW   KEY_ADC_PORT    // analog value for LCD keypad
+#define BUZZER_PIN  2     // digital pin for tone buzzer
+#define ANALOG_SW   A0    // analog value for LCD keypad
+
+// These key values work for most LCD shields
+MD_UISwitch_Analog::uiAnalogKeys_t kt[] =
+{
+  {  10, 10, 'R' },  // Right
+  { 130, 15, 'U' },  // Up
+  { 305, 15, 'D' },  // Down
+  { 475, 15, 'L' },  // Left
+  { 720, 15, 'S' },  // Select
+};
 
 // Global objects
 LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
-MD_AButton    lcdKeys(ANALOG_SW);
+MD_UISwitch_Analog lcdKeys(ANALOG_SW, kt, ARRAY_SIZE(kt));
 
 // Alarm setting registers
 uint8_t almH = 7, almM = 0;         // alm values, including defaults
@@ -130,7 +140,7 @@ void setMyAlarm(void)
     RTC.writeAlarm2(ALARM_OFF_TYPE);
 }  
 
-void doBuzzAlert()
+void doBuzzAlert(void)
 // Buzz piezo buzzer, not much to do here
 {
   tone(BUZZER_PIN, 800, 400);
@@ -138,7 +148,7 @@ void doBuzzAlert()
   tone(BUZZER_PIN, 690, 400);
 }
 
-void setup()
+void setup(void)
 {
   uint8_t  c[8];
   
@@ -177,9 +187,10 @@ void setup()
   displayUpdate();
 }
 
-void loop()
+void loop(void)
 {
-  char	c = lcdKeys.getKey();
+  MD_UISwitch::keyResult_t k = lcdKeys.read();
+  char	c = (k == MD_UISwitch::KEY_PRESS) ? lcdKeys.getKey() : '\0';
 
   // screen update through callback every second
   RTC.checkAlarm1();
