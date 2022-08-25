@@ -4,7 +4,8 @@
 // using from the serial monitor.
 //
 // Dependencies:
-// MD_cmdProcessor library available from https://github.com/MajicDesigns/MD_DS3231
+// MD_cmdProcessor library available from https://github.com/MajicDesigns/MD_DS3231 or Arduino IDE Library Manager
+//
 
 #include <Wire.h>
 #include <MD_DS3231.h>
@@ -13,48 +14,14 @@
 #define PRINTS(s)   Serial.print(F(s))
 #define PRINT(s, v) { Serial.print(F(s)); Serial.print(v); }
 
-void setup()
-{
-  Serial.begin(57600);
-  usage();
-  RTC.setAlarm1Callback(cbAlarm1);
-  RTC.setAlarm2Callback(cbAlarm2);
-}
+#define ARRAY_SIZE(a)  (sizeof(a)/sizeof((a)[0]))
 
-void usage(void)
-{
-  PRINTS("\n[MD_DS3231_Tester]");
-  PRINTS("\n?\thelp - this message");
-  PRINTS("\ntw yyyymmdd hhmmss dw\twrite the current date, time and day of week (1-7)");
-  PRINTS("\ntr\tread the current time");
-  PRINTS("\nrr\tread the IC registers as raw RAM");
-  PRINTS("\ns\tstatus of the RTC");
-  PRINTS("\nd\tcalculate day of week from current date");
-  PRINTS("\n\na1i v\talm 1 interrupt enable (v 0=disabled, 1=enabled)");
-  PRINTS("\na1f\talm 1 flag reset");
-  PRINTS("\na1t v\talm 1 set type (v 0=all s, 1=s, 2=s+m, 3=s+m+h, 4=s+m+h+dt, 5=s+m+h+dy)");
-  PRINTS("\na1z\talm 1 zero all values");
-  PRINTS("\na1w t v\talm 1 write type t=(as above) time v=yyyymmdd hhmmss dw");
-  PRINTS("\n\na2i v\talm2 interrupt enable (v 0=disabled, 1=enabled)");
-  PRINTS("\na2f\talm 2 flag reset");
-  PRINTS("\na2t v\talm2 set type (v 0=all m, 1=m, 2=m+h, 3=m+h+dt, 4=m+h+dy)");
-  PRINTS("\na2z\talm 2 zero all values");
-  PRINTS("\na2w t v\talm 2 write type t=(as above) time v=yyyymmdd hhmmss dw");
-  PRINTS("\n\nc n v\tcontrol write value v to status n, where n is");
-  PRINTS("\n\t0 - Clock Halt (v 0=run, 1=halt)");
-  PRINTS("\n\t1 - BB SQW Enable(v 0=halt, 1=run)");
-  PRINTS("\n\t2 - SQ Wave Freq (v 1=1Hz, 2=1khz, 3=4khz, 4=8kHz)");
-  PRINTS("\n\t3 - TCXO conversion (v unused)");
-  PRINTS("\n\t4 - 12 hour mode (v 0=24h, 1=12h)");
-  PRINTS("\n\t5 - Alm interrupt operation (v 0=disabled, 1=enabled)");
-  PRINTS("\n\t6 - Reset Halted Flag (v unused)");
-  PRINTS("\n\t7 - Enabled 32kHz output (v 0=disabled, 1=enabled)");
-  PRINTS("\n\t8 - Set aging register (v hex value)");
-}
+// handler function prototypes
+void handlerHelp(char* param);
 
 const char *dow2String(uint8_t code)
 {
-  static const char *str[] = {" ---", " Sun", " Mon", " Tue", " Wed", " Thu", " Fri", " Sat"};
+  static const char *str[] = {" ---", " Sun", " Mon", " Tue", " Wed", " Thu", " Fri", " Sat" };
 
   if (code > 7) code = 0;
   return(str[code]);
@@ -139,22 +106,22 @@ uint8_t htoi(char c)
       return(0);
 }
         
-uint8_t i2dig(uint8_t mode)
-// input 2 digits in the specified base
+char* i2dig(char *cp, uint16_t& v, uint8_t len, uint8_t base)
+// input len digits in the specified base
 {
-  uint8_t  v = 0;
-  char    c[3] = "00";
+  v = 0;
 
-  c[0] = readNext();
-  c[1] = readNext();
-
-  switch (mode)
+  for (uint8_t i = 0; i < len; i++)
   {
-    case DEC: v = atoi(c);  break;
-    case HEX: v = (htoi(c[0]) << 4) + htoi(c[1]); ;  break;
+    switch (base)
+    {
+    case DEC: v = (v * 10) + (*cp - '0'); break;
+    case HEX: v = (v << 4) + htoi(*cp);   break;
+    }
+    cp++;
   }
   
-  return(v);
+  return(cp);
 }
 
 char *p2dig(uint8_t v, uint8_t mode)
@@ -176,7 +143,129 @@ char *p2dig(uint8_t v, uint8_t mode)
   return(s);
 }
 
-void showStatus()
+void printTime(void)
+{
+  PRINT("\n", RTC.yyyy);
+  PRINT("-", p2dig(RTC.mm, DEC));
+  PRINT("-", p2dig(RTC.dd, DEC));
+  PRINT(" ", p2dig(RTC.h, DEC));
+  PRINT(":", p2dig(RTC.m, DEC));
+  PRINT(":", p2dig(RTC.s, DEC));
+  if (RTC.status(DS3231_12H) == DS3231_ON)
+    PRINT("", RTC.pm ? " pm" : " am");
+  PRINT("", dow2String(RTC.dow));
+}
+
+void inputTime(char* cp)
+{
+  uint16_t v;
+
+  cp = i2dig(cp, v, 4, DEC);
+  RTC.yyyy = v;
+  cp = i2dig(cp, v, 2, DEC);
+  RTC.mm = v;
+  cp = i2dig(cp, v, 2, DEC);
+  RTC.dd = v;
+
+  cp = i2dig(cp, v, 2, DEC);
+  RTC.h = v;
+  cp = i2dig(cp, v, 2, DEC);
+  RTC.m = v;
+  cp = i2dig(cp, v, 2, DEC);
+  RTC.s = v;
+
+  cp = i2dig(cp, v, 1, DEC);
+  RTC.dow = v;
+}
+
+void showTime(void)
+{
+  RTC.readTime();
+  printTime(); 
+}
+
+void showAlarm1(void)
+{
+  RTC.readAlarm1();
+  printTime();
+}
+
+void showAlarm2(void)
+{
+  RTC.readAlarm2();
+  printTime();
+}
+
+void cbAlarm1(void)
+// callback function for Alarm 2
+{
+  showTime();
+  PRINTS("\t-> Alarm 1");
+}
+
+void cbAlarm2(void)
+// callback function for Alarm 2
+{
+  showTime();
+  PRINTS("\t-> Alarm 2");
+}
+  
+// handler functions
+void handlerTW(char* param)
+{
+  inputTime(param);
+  RTC.writeTime();
+  showTime();
+}
+
+void handlerTR(char* param)
+{
+  showTime();
+}
+
+void hanlderRR(char* param)
+{
+#define  MAX_READ_BUF  (DS3231_RAM_MAX / 8)  // do 8 lines
+
+  uint8_t  k, regCount = 0;
+  uint8_t  buf[MAX_READ_BUF];
+
+  PRINTS("\n\n--------");
+  for (uint8_t i = 0; i < DS3231_RAM_MAX; i += MAX_READ_BUF)
+  {
+    RTC.readRAM(i, buf, MAX_READ_BUF);
+
+    PRINT("\n", p2dig(i, HEX));
+    PRINTS(": ");
+    for (uint8_t j = 0; j < MAX_READ_BUF; j++)
+    {
+      if (regCount < DS3231_RAM_MAX)
+      {
+        PRINT("", p2dig(buf[j], HEX));
+        PRINTS(" ");
+        k = j;  // save this index for the next loop
+        regCount++;
+      }
+      else
+        PRINTS("   ");
+    }
+    PRINTS("  ");
+    for (uint8_t j = 0; j <= k; j++)
+    {
+      if (isalnum(buf[j]) || ispunct(buf[j]))
+      {
+        PRINT("", (char)buf[j]);
+      }
+      else {
+        PRINTS(".");
+      }
+      PRINTS(" ");
+    }
+  }
+  PRINTS("\n--------");
+}
+
+void handlerS(char* param)
 {
   PRINTS("\n>- Settings -<");
   PRINT("\n/EOSC Halt Enabled:\t", sts2String(RTC.status(DS3231_CLOCK_HALT)));
@@ -187,13 +276,13 @@ void showStatus()
   PRINT("\n      12h mode:\t\t", sts2String(RTC.status(DS3231_12H)));
   PRINT("\nEN32k 32kHz enabled:\t", sts2String(RTC.status(DS3231_32KHZ_ENABLE)));
   PRINT("\nAGING Aging Offset:\t", sts2String(RTC.status(DS3231_AGING_OFFSET), true));
-  
+
   PRINTS("\n\n>- Status -<");
   PRINT("\nBSY  Busy Flag:\t\t", sts2String(RTC.status(DS3231_BUSY_FLAG)));
   PRINT("\nOSF  Halted Flag:\t", sts2String(RTC.status(DS3231_HALTED_FLAG)));
-  #if ENABLE_TEMP_COMP
+#if ENABLE_TEMP_COMP
   PRINT("\nTEMP Temp register:\t", RTC.readTempRegister());
-  #endif
+#endif
 
   PRINTS("\n\n>- Alarm 1 at ");
   showAlarm1();
@@ -208,459 +297,332 @@ void showStatus()
   PRINT("\nA2M2_4 Type:\t", alm2String(RTC.getAlarm2Type()));
 }
 
-void printTime()
-{
-  PRINT("", RTC.yyyy);
-  PRINT("-", p2dig(RTC.mm, DEC));
-  PRINT("-", p2dig(RTC.dd, DEC));
-  PRINT(" ", p2dig(RTC.h, DEC));
-  PRINT(":", p2dig(RTC.m, DEC));
-  PRINT(":", p2dig(RTC.s, DEC));
-  if (RTC.status(DS3231_12H) == DS3231_ON)
-    PRINT("", RTC.pm ? " pm" : " am");
-  PRINT("", dow2String(RTC.dow));
-}
-
-void showTime()
-{
-  RTC.readTime();
-  PRINTS("\nTime - ");
-  printTime(); 
-}
-
-void showAlarm1()
-{
-  RTC.readAlarm1();
-  printTime();
-}
-
-void showAlarm2()
-{
-  RTC.readAlarm2();
-  printTime();
-}
-
-void showRAM()
-{
-  #define  MAX_READ_BUF  (DS3231_RAM_MAX / 8)  // do 8 lines
- 
-  uint8_t  k, regCount = 0;
-  uint8_t  buf[MAX_READ_BUF];
-  
-  PRINTS("\n\n--------");
-  for (uint8_t i=0; i<DS3231_RAM_MAX; i+=MAX_READ_BUF)
-  {
-    RTC.readRAM(i, buf, MAX_READ_BUF);
-    
-    PRINT("\n", p2dig(i, HEX));
-    PRINTS(": ");
-    for (uint8_t j=0; j<MAX_READ_BUF; j++)
-    {
-      if (regCount < DS3231_RAM_MAX)
-      {
-        PRINT("", p2dig(buf[j], HEX));
-        PRINTS(" ");
-        k = j;  // save this index for the next loop
-        regCount++;
-      } else
-        PRINTS("   ");
-    } 
-    PRINTS("  ");
-    for (uint8_t j=0; j<=k; j++)
-    {
-      if (isalnum(buf[j]) || ispunct(buf[j]))
-      {
-        PRINT("", (char) buf[j]);
-      } else {
-        PRINTS(".");
-      }      
-      PRINTS(" ");
-    } 
-  }
-  PRINTS("\n--------");
-}
-
-void inputTime(void)
-{
-  RTC.yyyy = i2dig(DEC)*100 + i2dig(DEC);
-  RTC.mm = i2dig(DEC);
-  RTC.dd = i2dig(DEC);
-  
-  RTC.h = i2dig(DEC);
-  RTC.m = i2dig(DEC);
-  RTC.s = i2dig(DEC);
-  
-  RTC.dow = i2dig(DEC);
-}  
-  
-void showDoW(void)
+void handlerD(char* param)
 {
   RTC.readTime();
   PRINT("\nCalculated DoW (", RTC.calcDoW(RTC.yyyy, RTC.mm, RTC.dd));
-  PRINT(") is ", dow2String(RTC.calcDoW(RTC.yyyy, RTC.mm, RTC.dd)));
+  PRINT(") is", dow2String(RTC.calcDoW(RTC.yyyy, RTC.mm, RTC.dd)));
 }
 
-void cbAlarm1()
-// callback function for Alarm 2
+void handlerA1I(char* param)
 {
-  showTime();
-  PRINTS("\t-> Alarm 1");  
+  codeRequest_t item = DS3231_A1_INT_ENABLE;
+  codeStatus_t  value;
+
+  switch (toupper(*param))
+  {
+    case '0': value = DS3231_OFF;  break;
+    case '1': value = DS3231_ON;  break;
+    default:
+      PRINT("\nBad parameter - ", *param);
+      return;
+  }
+
+  PRINT("\nAlarm 1 ", ctl2String(item));
+  PRINT(" value ", sts2String(value));
+  PRINT(" result ", RTC.control(item, value));
 }
 
-void cbAlarm2()
-// callback function for Alarm 2
+void handlerA1F(char* param)
 {
-  showTime();
-  PRINTS("\t-> Alarm 2");
+  codeRequest_t item = DS3231_A1_FLAG;
+  codeStatus_t  value = DS3231_OFF;
+
+  PRINT("\nAlarm 1 ", ctl2String(item));
+  PRINT(" value ", sts2String(value));
+  PRINT(" result ", RTC.control(item, value));
 }
 
-void doAlarm1()
+void handlerA1T(char* param)
 {
-  char  c = readNext();
+  almType_t alm;
+
+  switch (toupper(*param))
+  {
+    case '0': alm = DS3231_ALM_SEC;   break;
+    case '1': alm = DS3231_ALM_S;     break;
+    case '2': alm = DS3231_ALM_MS;    break;
+    case '3': alm = DS3231_ALM_HMS;   break;
+    case '4': alm = DS3231_ALM_DTHMS; break;
+    case '5': alm = DS3231_ALM_DDHMS; break;
+    default:
+      PRINT("\nBad parameter - ", *param);
+      return;
+  }
+  PRINT("\nAlarm 1 set type ", alm2String(alm));
+  PRINT(" result ", RTC.setAlarm1Type(alm));
+}
+
+void handlerA1Z(char* param)
+{
+  RTC.yyyy = RTC.mm = RTC.dd = 0;
+  RTC.h = RTC.m = RTC.s = 0;
+  RTC.dow = RTC.pm = 0;
+  RTC.writeAlarm1(DS3231_ALM_DTHMS);
+  showAlarm1();
+}
+
+void handlerA1W(char* param)
+{
+  almType_t alm;
+
+  switch (toupper(*param))
+  {
+    case '0': alm = DS3231_ALM_SEC;   break;
+    case '1': alm = DS3231_ALM_S;     break;
+    case '2': alm = DS3231_ALM_MS;    break;
+    case '3': alm = DS3231_ALM_HMS;   break;
+    case '4': alm = DS3231_ALM_DTHMS; break;
+    case '5': alm = DS3231_ALM_DDHMS; break;
+      PRINT("\nBad parameter - ", *param);
+      return;
+  }
+  inputTime(param);
+  RTC.writeAlarm1(alm);
+  showAlarm1();
+}
+
+void handlerA2I(char* param)
+{
+  codeRequest_t item = DS3231_A2_INT_ENABLE;
+  codeStatus_t  value;
+
+  switch (toupper(*param))
+  {
+    case '0': value = DS3231_OFF;  break;
+    case '1': value = DS3231_ON;  break;
+    default:
+      PRINT("\nBad parameter - ", *param);
+      return;
+  }
+
+  PRINT("\nAlarm 2 ", ctl2String(item));
+  PRINT(" value ", sts2String(value));
+  PRINT(" result ", RTC.control(item, value));
+}
+
+void handlerA2F(char* param)
+{
+  codeRequest_t item = DS3231_A2_FLAG;
+  codeStatus_t  value = DS3231_OFF;
+
+  PRINT("\nAlarm 2 ", ctl2String(item));
+  PRINT(" value ", sts2String(value));
+  PRINT(" result ", RTC.control(item, value));
+}
+
+void handlerA2T(char* param)
+{
+  almType_t alm;
+
+  switch (toupper(*param))
+  {
+    case '0': alm = DS3231_ALM_SEC;   break;
+    case '1': alm = DS3231_ALM_S;     break;
+    case '2': alm = DS3231_ALM_MS;    break;
+    case '3': alm = DS3231_ALM_HMS;   break;
+    case '4': alm = DS3231_ALM_DTHMS; break;
+    case '5': alm = DS3231_ALM_DDHMS; break;
+    default:
+      PRINT("\nBad parameter - ", *param);
+      return;
+  }
+  PRINT("\nAlarm 2 set type ", alm2String(alm));
+  PRINT(" result ", RTC.setAlarm2Type(alm));
+}
+
+void handlerA2Z(char* param)
+{
+  RTC.yyyy = RTC.mm = RTC.dd = 0;
+  RTC.h = RTC.m = RTC.s = 0;
+  RTC.dow = RTC.pm = 0;
+  RTC.writeAlarm2(DS3231_ALM_DTHMS);
+  showAlarm2();
+}
+
+void handlerA2W(char* param)
+{
+  almType_t alm;
+
+  switch (toupper(*param))
+  {
+    case '0': alm = DS3231_ALM_SEC;   break;
+    case '1': alm = DS3231_ALM_S;     break;
+    case '2': alm = DS3231_ALM_MS;    break;
+    case '3': alm = DS3231_ALM_HMS;   break;
+    case '4': alm = DS3231_ALM_DTHMS; break;
+    case '5': alm = DS3231_ALM_DDHMS; break;
+      PRINT("\nBad parameter - ", *param);
+      return;
+  }
+  inputTime(param);
+  RTC.writeAlarm2(alm);
+  showAlarm2();
+}
+
+void handlerC(char* param)
+{
   codeRequest_t item;
   codeStatus_t  value;
-  almType_t alm;
-  
-  switch (toupper(c))
+
+  switch (toupper(*param++))
   {
-    case 'I': // interrupt enable
-      item = DS3231_A1_INT_ENABLE;
-      c = readNext();
-      switch (toupper(c))
-      {
-        case '0': value = DS3231_OFF;  break;
-        case '1': value = DS3231_ON;  break;
-        default: goto error;
-      }
+  case '0':  // halt
+    item = DS3231_CLOCK_HALT;
+    switch (toupper(*param))
+    {
+      case '0': value = DS3231_OFF;  break;
+      case '1': value = DS3231_ON;  break;
+      default: goto error;
+    }
+    break;
 
-      PRINT("\nAlarm 1 ", ctl2String(item));
-      PRINT(" value ", sts2String(value));
-      PRINT(" result ", RTC.control(item, value));
-      break;
-      
-    case 'F': // alarm flag
-      item = DS3231_A1_FLAG;
-      value = DS3231_OFF;
-      PRINT("\nAlarm 1 ", ctl2String(item));
-      PRINT(" value ", sts2String(value));
-      PRINT(" result ", RTC.control(item, value));
-      break;
-      
-    case 'T': // alarm type
-      c = readNext();
-      switch (toupper(c))
-      {
-        case '0': alm = DS3231_ALM_SEC;   break;
-        case '1': alm = DS3231_ALM_S;     break;
-        case '2': alm = DS3231_ALM_MS;    break;
-        case '3': alm = DS3231_ALM_HMS;   break;
-        case '4': alm = DS3231_ALM_DTHMS; break;
-        case '5': alm = DS3231_ALM_DDHMS; break;
-        default: goto error;
-      }
-      PRINT("\nAlarm 1 set type ", alm2String(alm));
-      PRINT(" result ", RTC.setAlarm1Type(alm));
-      break;
+  case '1':  // enable
+    item = DS3231_SQW_ENABLE;
+    switch (toupper(*param))
+    {
+      case '0': value = DS3231_OFF;  break;
+      case '1': value = DS3231_ON;   break;
+      default: goto error;
+    }
+    break;
 
-    case 'Z': // zero all values
-      RTC.yyyy = RTC.mm = RTC.dd = 0;
-      RTC.h = RTC.m = RTC.s = 0;
-      RTC.dow = RTC.pm = 0;
-      RTC.writeAlarm1(DS3231_ALM_DTHMS);
-      showAlarm1();
-      break;
-      
-    case 'W': // write alarm setting
-      c = readNext();
-      switch (toupper(c))
-      {
-        case '0': alm = DS3231_ALM_SEC;   break;
-        case '1': alm = DS3231_ALM_S;     break;
-        case '2': alm = DS3231_ALM_MS;    break;
-        case '3': alm = DS3231_ALM_HMS;   break;
-        case '4': alm = DS3231_ALM_DTHMS; break;
-        case '5': alm = DS3231_ALM_DDHMS; break;
-        default: goto error;
-      }
-      inputTime();
-      RTC.writeAlarm1(alm);
-      showAlarm1();
-      break;
-      
-    default:
-error:
+  case '2':  // type on
+    item = DS3231_SQW_TYPE;
+    switch (toupper(*param))
+    {
+      case '1': value = DS3231_SQW_1HZ;   break;
+      case '2': value = DS3231_SQW_1KHZ;  break;
+      case '3': value = DS3231_SQW_4KHZ;  break;
+      case '4': value = DS3231_SQW_8KHZ;  break;
+      default: goto error;
+    }
+    break;
+
+  case '3':  // tcxo conversion
+    item = DS3231_TCONV;
+    value = DS3231_ON;
+    break;
+
+  case '4':  // 12 h mode
+    item = DS3231_12H;
+    switch (toupper(*param))
+    {
+      case '0': value = DS3231_OFF;  break;
+      case '1': value = DS3231_ON;   break;
+      default: goto error;
+    }
+    break;
+
+  case '5':  // alm interrupt operation
+    item = DS3231_INT_ENABLE;
+    switch (toupper(*param))
+    {
+      case '0': value = DS3231_OFF;  break;
+      case '1': value = DS3231_ON;   break;
+      default: goto error;
+    }
+    break;
+
+  case '6':  // reset halted flag
+    item = DS3231_HALTED_FLAG;
+    value = DS3231_OFF;
+    break;
+
+  case '7':  // enable 32kHz output
+    item = DS3231_32KHZ_ENABLE;
+    switch (toupper(*param))
+    {
+      case '0': value = DS3231_OFF;  break;
+      case '1': value = DS3231_ON;   break;
+      default: goto error;
+    }
+    break;
+
+  case '8':  // enable 32kHz output
+    {
+      item = DS3231_AGING_OFFSET;
+      uint16_t v;
+
+      i2dig(param, v, 2, HEX);
+      value = (codeStatus_t)v;
+    }
+    break;
+
+  default:
+  error:
     PRINTS("\nBad control element or parameter");
     return;
   }
 
-  return;
-}
-
-void doAlarm2()
-{
-  char  c = readNext();
-  codeRequest_t item;
-  codeStatus_t  value;
-  almType_t alm;
-  
-  switch (toupper(c))
-  {
-    case 'I': // interrupt enable
-      item = DS3231_A2_INT_ENABLE;
-      c = readNext();
-      switch (toupper(c))
-      {
-        case '0': value = DS3231_OFF;  break;
-        case '1': value = DS3231_ON;  break;
-        default: goto error;
-      }
-      PRINT("\nAlarm 2 ", ctl2String(item));
-      PRINT(" value ", sts2String(value));
-      PRINT(" result ", RTC.control(item, value));
-      break;
-    
-    case 'F': // alarm flag
-      item = DS3231_A2_FLAG;
-      value = DS3231_OFF;
-      PRINT("\nAlarm 2 ", ctl2String(item));
-      PRINT(" value ", sts2String(value));
-      PRINT(" result ", RTC.control(item, value));
-      break;
-    
-    case 'T': // alarm type
-      c = readNext();
-      switch (toupper(c))
-      {
-        case '0': alm = DS3231_ALM_MIN;   break;
-        case '1': alm = DS3231_ALM_M;     break;
-        case '2': alm = DS3231_ALM_HM;    break;
-        case '3': alm = DS3231_ALM_DTHM;  break;
-        case '4': alm = DS3231_ALM_DDHM;  break;
-        default: goto error;
-      }
-      PRINT("\nAlarm 2 set type ", alm2String(alm));
-      PRINT(" result ", RTC.setAlarm2Type(alm));
-      break;
-
-    case 'Z': // zero all values
-      RTC.yyyy = RTC.mm = RTC.dd = 0;
-      RTC.h = RTC.m = RTC.s = 0;
-      RTC.dow = RTC.pm = 0;
-      RTC.writeAlarm2(DS3231_ALM_DTHM);
-      showAlarm2();
-      break;
-
-    case 'W': // write alarm setting
-      c = readNext();
-      switch (toupper(c))
-      {
-        case '0': alm = DS3231_ALM_MIN;   break;
-        case '1': alm = DS3231_ALM_M;     break;
-        case '2': alm = DS3231_ALM_HM;    break;
-        case '3': alm = DS3231_ALM_DTHM;  break;
-        case '4': alm = DS3231_ALM_DDHM;  break;
-        default: goto error;
-      }
-      inputTime();
-      RTC.writeAlarm2(alm);
-      showAlarm2();
-      break;
-    
-    default:
-error:
-      PRINTS("\nBad control element or parameter");
-      return;
-  }
-
-  return;
-}
-
-void writeControl()
-{
-  char  c = readNext();
-  codeRequest_t item;
-  codeStatus_t  value;
-  
-  switch (toupper(c))
-  {
-    case '0':  // halt
-      item = DS3231_CLOCK_HALT;
-      c = readNext();
-      switch (toupper(c))
-      {
-        case '0': value = DS3231_OFF;  break;
-        case '1': value = DS3231_ON;  break;
-        default: goto error;
-      }
-      break;
-      
-    case '1':  // enable
-      item = DS3231_SQW_ENABLE;
-      c = readNext();
-      switch (toupper(c))
-      {
-        case '0': value = DS3231_OFF;  break;
-        case '1': value = DS3231_ON;   break;
-        default: goto error;
-      }
-      break;
-      
-    case '2':  // type on
-      item = DS3231_SQW_TYPE;
-      c = readNext();
-      switch (toupper(c))
-      {
-        case '1': value = DS3231_SQW_1HZ;   break;
-        case '2': value = DS3231_SQW_1KHZ;  break;
-        case '3': value = DS3231_SQW_4KHZ;  break;
-        case '4': value = DS3231_SQW_8KHZ;  break;
-        default: goto error;
-      }
-      break;
-      
-    case '3':  // tcxo conversion
-      item = DS3231_TCONV;
-      value = DS3231_ON;
-      break;
-      
-    case '4':  // 12 h mode
-      item = DS3231_12H;
-      c = readNext();
-      switch (toupper(c))
-      {
-        case '0': value = DS3231_OFF;  break;
-        case '1': value = DS3231_ON;   break;
-        default: goto error;
-      }
-      break;
-      
-    case '5':  // alm interrupt operation
-      item = DS3231_INT_ENABLE;
-      c = readNext();
-      switch (toupper(c))
-      {
-        case '0': value = DS3231_OFF;  break;
-        case '1': value = DS3231_ON;   break;
-        default: goto error;
-      }
-      break;
-
-    case '6':  // reset halted flag
-      item = DS3231_HALTED_FLAG;
-      value = DS3231_OFF;
-      break;
-
-    case '7':  // enable 32kHz output
-      item = DS3231_32KHZ_ENABLE;
-      c = readNext();
-      switch (toupper(c))
-      {
-        case '0': value = DS3231_OFF;  break;
-        case '1': value = DS3231_ON;   break;
-        default: goto error;
-      }
-      break;
-
-    case '8':  // enable 32kHz output
-      item = DS3231_AGING_OFFSET;
-      value = (codeStatus_t) i2dig(HEX);
-      break;
-
-    default:
- error:
-      PRINTS("\nBad control element or parameter");
-      return;
-  }
-  
   // do it
   PRINT("\nControlling ", ctl2String(item));
   PRINT(" to ", sts2String(value, (item == DS3231_AGING_OFFSET)));
   PRINT(", result ", RTC.control(item, value));
-  
+
   return;
 }
 
-char readNext()
-// Read the next character from the serial input stream, skip whitespace.
-// Busy loop that also checks for an alarm occurence.
+const MD_cmdProcessor::cmdItem_t PROGMEM cmdTable[] =
 {
-  char  c;
-  
-  do
-  {
-    while (!Serial.available())
-    {
-      RTC.checkAlarm1();
-      RTC.checkAlarm2();
-    }      
-    c = Serial.read();
-  } while (isspace(c));
+  { "?",   handlerHelp, "",    "Help", 0 },
+  { "h",   handlerHelp, "",    "Help", 0 },
+  { "tw",  handlerTW,   "t",   "writes specifed time spec (see below)", 1 },
+  { "tr",  handlerTR,   "",    "read the current time", 1 },
+  { "rr",  hanlderRR,   "",    "read the IC registers as raw RAM", 1 },
+  { "s",   handlerS,    "",    "status of the RTC", 1 },
+  { "d",   handlerD,    "",    "calculate day of week from current date", 1 },
+  { "a1i", handlerA1I,  "v",   "alm1 int ena (0=dis, 1=ena)", 2 },
+  { "a1f", handlerA1F,  "",    "alm1 flag reset", 2 },
+  { "a1t", handlerA1T,  "a",   "alm1 set alm type (see below)", 2 },
+  { "a1z", handlerA1Z,  "",    "alm1 zero all values", 2 },
+  { "a1w", handlerA1W,  "at",  "alm1 write alm type a & time spec t (see below)", 2 },
+  { "a2i", handlerA2I,  "v",   "alm2 int ena (0=dis, 1=ena)", 3 },
+  { "a2f", handlerA2F,  "",    "alm2 flag reset", 3 },
+  { "a2t", handlerA2T,  "v",   "alm2 set alm type (see below)", 3 },
+  { "a2z", handlerA2Z,  "",    "alm2 zero all values", 3 },
+  { "a2w", handlerA2W,  "at",  "alm1 write alm type a & time spec t (see below)", 3 },
+  { "c"  , handlerC,    "nv",  "control status n, write value v, where n,n are:", 4 }
+};
 
-  return(c);
+MD_cmdProcessor CP(Serial, cmdTable, ARRAY_SIZE(cmdTable));
+
+void handlerHelp(char *param)
+{
+  Serial.print(F("\nHelp\n----"));
+  CP.help();
+  // Expand on configuration items
+  PRINTS("\n\t0 - Clock Halt (v 0=run, 1=halt)");
+  PRINTS("\n\t1 - BB SQW Enable(v 0=halt, 1=run)");
+  PRINTS("\n\t2 - SQ Wave Freq (v 1=1Hz, 2=1khz, 3=4khz, 4=8kHz)");
+  PRINTS("\n\t3 - TCXO conversion (v unused)");
+  PRINTS("\n\t4 - 12 hour mode (v 0=24h, 1=12h)");
+  PRINTS("\n\t5 - Alm interrupt operation (v 0=disabled, 1=enabled)");
+  PRINTS("\n\t6 - Reset Halted Flag (v unused)");
+  PRINTS("\n\t7 - Enabled 32kHz output (v 0=disabled, 1=enabled)");
+  PRINTS("\n\t8 - Set aging register (v hex value)");
+  PRINTS("\n");
+  PRINTS("\nTime specification is yyyymmddhhnnssw (24 hr clock, w 1=Sun..7=Sat)");
+  PRINTS("\nAlarm Type specification is 0=all s, 1=s, 2=s+m, 3=s+m+h, 4=s+m+h+dt, 5=s+m+h+dy");
+  PRINTS("\n");
 }
 
-void loop()
+void setup(void)
 {
-   char  c;
-   
-   PRINTS("\n");
-   // we need to get the next character to know what command we want to process 
-   c = readNext();
-   switch (toupper(c))
-   {
-     case '?':  usage();  break;
-     
-     case 'S':  showStatus();    break;
-     case 'C':  writeControl();  break;
-     case 'D':  showDoW();       break;
-     case 'A':  
-       c = readNext();
-       switch(toupper(c))
-       {
-         case '1': doAlarm1();    break;
-         case '2': doAlarm2();    break;
-         default: goto no_good;
-       }
-       break;         
-     
-     // Read functions
-     case 'R':  // Display updates      
-       c = readNext();
-       switch (toupper(c))
-       {
-         case 'R': showRAM();   break;
-         default: goto no_good;
-       }
-       break;
-    
-     // Write functions
-     case 'T':  // Display updates      
-       c = readNext();
-       switch (toupper(c))
-       {
-         case 'R': 
-            showTime();  
-            break;
-            
-         case 'W': 
-            inputTime();
-            RTC.writeTime();
-            showTime();
-            break;
-            
-         default: goto no_good;
-       }
-       break;
+  Serial.begin(57600);
+  PRINTS("\n[MD_DS3231_Tester]");
+  
+  RTC.setAlarm1Callback(cbAlarm1);
+  RTC.setAlarm2Callback(cbAlarm2);
 
-       default:  // don't know what to do with this! 
-no_good:         // label for default escape when we can't process a character 
-        {
-          PRINT("\nBad parameter '", c);
-          PRINTS("'");
-          while (Serial.available())    // flush the buffer
-            c = readNext();
-        }
-        break;
-   }  
+  CP.begin();
+  handlerHelp(nullptr);
+}
+
+void loop(void)
+{
+   RTC.checkAlarm1();
+   RTC.checkAlarm2();
+   CP.run();
  }
 

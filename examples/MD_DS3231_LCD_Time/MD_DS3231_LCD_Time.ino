@@ -7,9 +7,9 @@
 // or interrupt mode. Different modes of operation are enabled through setting 
 // one of the USE_* defines at the top of the file.
 //
+#include <Wire.h>
 #include <LiquidCrystal.h>
 #include <MD_DS3231.h>
-#include <Wire.h>
 
 // Select the mode of operation for the library
 #define USE_POLLED      0 // polled only mode - use the return status from checkAlarm()

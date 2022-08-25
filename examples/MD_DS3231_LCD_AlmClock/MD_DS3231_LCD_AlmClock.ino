@@ -9,12 +9,13 @@
 // Alarm is toggled on/off using the UP key
 // Alarm triggered will play a tone on a piezo speaker on BUZZER_PIN.
 //
+// Dependencies
 // MD_AButton library located at https://github.com/MajicDesigns/MD_AButton
 //
+#include <Wire.h>
 #include <LiquidCrystal.h>
 #include <MD_DS3231.h>
 #include <MD_AButton.h>
-#include <Wire.h>
 
 // Define as 1 if alarm time to be initialised from variables, otherwise use RTC values
 #define INIT_ALM_DEFAULTS 0

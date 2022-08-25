@@ -40,6 +40,7 @@ Revision History
 ----------------
 Aug 2022 version 1.3.2
 - Fixed compiler warning about out of order initializers
+- Changed Test example to use MD_cmdProcessor instead of hard coded input processing
 
 Feb 2019 version 1.3.1
 - Fixed incorrect writeDevice logical expression (issue #10)
