@@ -38,6 +38,9 @@ ___
 
 Revision History 
 ----------------
+Jan 2025 version 1.4.1
+- Improved consistency of error checking when calling readDevice()
+
 Aug 2022 version 1.4.0
 - Fixed compiler warning about out of order initializers
 - Changed Test example to use MD_cmdProcessor instead of hard coded input processing
@@ -253,7 +256,7 @@ The DS3231_LCD_Time example has examples of the different ways of interacting wi
 #define ENABLE_RTC_INSTANCE 1 ///< Enable default RTC instance creation
 
 /**
-  Control and Status Request enumerated type.
+  * Control and Status Request enumerated type.
   *
   * This enumerated type is used with the control() and status() methods to identify 
   * the control action request.

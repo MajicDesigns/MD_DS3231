@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['software_20overview_0',['Software Overview',['../page_software.html',1,'index']]]
+  ['ds3231_20library_0',['Arduino DS3231 Library',['../index.html',1,'']]]
 ];

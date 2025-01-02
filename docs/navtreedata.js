@@ -25,7 +25,7 @@
 var NAVTREE =
 [
   [ "MD_DS3231 Real Time Clock Library", "index.html", [
-    [ "Arduino DS3231 Library", "index.html", null ],
+    [ "Arduino DS3231 Library", "index.html", "index" ],
     [ "Classes", "annotated.html", [
       [ "Class List", "annotated.html", "annotated_dup" ],
       [ "Class Index", "classes.html", null ],
@@ -53,5 +53,5 @@ var NAVTREEINDEX =
 "_m_d___d_s3231_8h.html"
 ];
 
-var SYNCONMSG = 'click to disable panel synchronisation';
-var SYNCOFFMSG = 'click to enable panel synchronisation';
+var SYNCONMSG = 'click to disable panel synchronization';
+var SYNCOFFMSG = 'click to enable panel synchronization';
